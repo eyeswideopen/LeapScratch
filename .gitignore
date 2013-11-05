@@ -1,4 +1,9 @@
 LeapDeveloperKit
 bin
 include
-lib
+lib/python2.7
+scripts
+Lib
+Include
+*.pyc
+.Python
