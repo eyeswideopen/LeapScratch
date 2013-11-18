@@ -5,7 +5,6 @@
 # https://developer.leapmotion.com/sdk_agreement, or another agreement         #
 # between Leap Motion and you, your company or other organization.             #
 ################################################################################
-
 import Leap, sys
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
