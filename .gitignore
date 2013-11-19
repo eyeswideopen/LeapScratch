@@ -8,4 +8,5 @@ Include
 *.pyc
 .Python
 output
+.idea
 input
