@@ -7,3 +7,5 @@ Lib
 Include
 *.pyc
 .Python
+output
+input
