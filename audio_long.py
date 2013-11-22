@@ -1,5 +1,5 @@
 from __future__ import division
-import wave,audioop,pyaudio,numpy
+import wave,audioop,pyaudio,numpy,sys
 
 class Sampler():
 
@@ -28,8 +28,9 @@ class Sampler():
 
     def playPart(self,reverse,scale):
 
-        if len(self.savedReversedData)==0 and reverse:
-            raise RuntimeError("LP out of range")
+        if (len(self.savedReversedData)==0 and reverse):
+            print("LP out of range, underplayed")
+            sys.exit(0)
 
         CHUNK=1024
         inverseScale=1/scale
@@ -39,6 +40,10 @@ class Sampler():
 
         if scale<1:
             frames=int(CHUNK*inverseScale)
+
+        if (frames+self.index>self.wave.getnframes()):
+            print("LP out of range, overplayed")
+            sys.exit(0)
 
 
         if not reverse and self.wave.tell()==self.index:
@@ -64,6 +69,7 @@ class Sampler():
 
         if len(data)==0:
             #TODO: why?
+            print(reverse,scale)
             return 0
 
         if reverse:
@@ -127,9 +133,8 @@ if __name__=="__main__":
     vectorReverse=[False for i in range(1000)]
     vectorReverse+=[True for i in range(250)]
     vectorReverse+=[False for i in range(250)]
-
     vectorReverse+=[True for i in range(250)]
-    vectorReverse+=[False for i in range(250)]
+    vectorReverse+=[False for i in range(325)]
     vectorReverse+=[True for i in range(500)]
 
 
