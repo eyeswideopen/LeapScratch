@@ -1,99 +1,141 @@
-import pyaudio
-import wave
-import numpy
-import audioop
+from __future__ import division
+import wave,audioop,pyaudio,numpy
 
-def resample(smp, scale=1.0):
+class Sampler():
 
-    n = round(len(smp) * scale)
+    def __init__(self,waveFile):
+        self.wave=wave.open(waveFile, 'rb')
+        self.audio=pyaudio.PyAudio()
+        self.stream = self.audio.open(format=self.audio.get_format_from_width(self.wave.getsampwidth()),
+            channels=self.wave.getnchannels(),
+            rate=int(self.wave.getframerate()),
+            output=True)
 
-    return numpy.interp(
-        numpy.linspace(0.0, 1.0, n, endpoint=False),
-        numpy.linspace(0.0, 1.0, len(smp), endpoint=False),
-        smp,
-        )
-
-
-reverse=False
-scale=5
+        self.savedData=""
+        self.savedReversedData=""
+        self.index=0
 
 
-CHUNK = 1024
+    def resample(self,smp, scale=1.0):
 
-wf = wave.open("input/file.wav", 'rb')
+        n = round(len(smp) * scale)
 
-p = pyaudio.PyAudio()
+        return numpy.interp(
+            numpy.linspace(0.0, 1.0, n, endpoint=False),
+            numpy.linspace(0.0, 1.0, len(smp), endpoint=False),
+            smp,
+            )
 
-stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-    channels=wf.getnchannels(),
-    rate=int(wf.getframerate()),
-    output=True)
+    def playPart(self,reverse,scale):
 
-index=0
-if reverse:
-    index=wf.getnframes()-CHUNK
-    wf.setpos(index)
+        if len(self.savedReversedData)==0 and reverse:
+            raise RuntimeError("LP out of range")
+
+        CHUNK=1024
+        inverseScale=1/scale
+        frames=CHUNK
+        data=0
 
 
-while True:
-    inverseScale=1/scale
+        if scale<1:
+            frames=int(CHUNK*inverseScale)
 
-    data=None
-    border=None
 
-    if scale<1:
-        frames=int(CHUNK*inverseScale)
-        border=frames
+        if not reverse and self.wave.tell()==self.index:
+            data=self.wave.readframes(frames)
+            self.savedReversedData+=data
+            self.savedData=""
+            self.index+=frames
+
+        else:
+
+            if reverse:
+                ind=len(self.savedReversedData)-frames*4
+                data=self.savedReversedData[ind:]
+                self.savedReversedData=self.savedReversedData[:ind]
+                self.savedData=data+self.savedData
+                self.index-=frames
+            else:
+                ind=frames*4
+                data=self.savedData[:ind]
+                self.savedData=self.savedData[ind:]
+                self.savedReversedData+=data
+                self.index+=frames
+
+        if len(data)==0:
+            #TODO: why?
+            return 0
 
         if reverse:
-            data = audioop.reverse(wf.readframes(frames),wf.getsampwidth())
+            data = audioop.reverse(data,self.wave.getsampwidth())
+
+
+        if scale!=1:
+
+            audio_data = numpy.fromstring(data, dtype=numpy.int16)
+            output=self.resample(audio_data,scale)
+            string_audio_data=output.astype(numpy.int16).tostring()
+
         else:
-            data=wf.readframes(frames)
-
-        audio_data = numpy.fromstring(data, dtype=numpy.int16)
-        output=resample(audio_data,scale)
-        string_audio_data=output.astype(numpy.int16).tostring()
-
-        stream.write(string_audio_data)
-
-    elif scale>1:
-        border=CHUNK
-
-        if reverse:
-            data = audioop.reverse(wf.readframes(CHUNK),wf.getsampwidth())
-        else:
-            data=wf.readframes(CHUNK)
-
-        audio_data = numpy.fromstring(data, dtype=numpy.int16)
-        output=resample(audio_data,scale)
-        string_audio_data = output.astype(numpy.int16).tostring()
+            string_audio_data=data
 
         for i in range(0,len(string_audio_data),len(data)):
-             stream.write(string_audio_data[i:i+len(data)])
+             self.stream.write(string_audio_data[i:i+len(data)])
 
+        return frames
 
-    else:
-        border=CHUNK
+    def play(self,reverse,scale):
+
+        CHUNK = 1024
+        index=0
         if reverse:
-            data = audioop.reverse(wf.readframes(CHUNK),wf.getsampwidth())
-        else:
-            data=wf.readframes(CHUNK)
-        stream.write(data)
+            index=self.wave.getnframes()-CHUNK
+            self.wave.setpos(index)
 
 
-    if reverse:
-        index-=border
-        if index<0:
-            break
-        wf.setpos(index)
-    else:
-        index+=border
-        if index>=wf.getnframes():
-            break
+        while True:
+            border=self.playPart(reverse,scale)
+
+            if reverse:
+                index-=border
+                if index<0:
+                    break
+                self.wave.setpos(index)
+            else:
+                index+=border
+                if index>=self.wave.getnframes():
+                    break
 
 
-stream.stop_stream()
-stream.close()
-p.terminate()
+        self.stream.stop_stream()
+        self.stream.close()
+        self.audio.terminate()
+
+if __name__=="__main__":
+
+    sa=Sampler("output/file.wav")
+    #sa.play(False,0.3)
+    vectorSpeed=[1 for i in range(1000)]
+    vectorSpeed+=[(j/510) for j in range(200,510,5)[::-1]]
+    vectorSpeed+=[(k/800) for k in range(200,800,5)]
+    vectorSpeed+=[(k/800) for k in range(200,800,5)[::-1]]
+    vectorSpeed+=[1 for i in range(1000)]
+
+    # for s in vectorSpeed:
+    #     sa.playPart(False,s)
+
+    vectorReverse=[False for i in range(1000)]
+    vectorReverse+=[True for i in range(250)]
+    vectorReverse+=[False for i in range(250)]
+
+    vectorReverse+=[True for i in range(250)]
+    vectorReverse+=[False for i in range(250)]
+    vectorReverse+=[True for i in range(500)]
 
 
+    # for r in vectorReverse:
+    #     sa.playPart(r,1)
+
+
+    for i in range(len(vectorSpeed)):
+        sa.playPart(vectorReverse[i],vectorSpeed[i])
