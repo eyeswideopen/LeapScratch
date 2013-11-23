@@ -14,7 +14,8 @@ class Sampler():
         self.savedData=""
         self.savedReversedData=""
         self.index=0
-
+        self.length=self.wave.getnframes()
+        self.sampleWidth=self.wave.getsampwidth()
 
     def resample(self,smp, scale=1.0):
 
@@ -27,8 +28,10 @@ class Sampler():
             )
 
     def playPart(self,reverse,scale):
-
-        if (len(self.savedReversedData)==0 and reverse):
+        if self.index>=self.length:
+            print("LP out of range, overplayed")
+            sys.exit(0)
+        elif self.index<=0 and reverse:
             print("LP out of range, underplayed")
             sys.exit(0)
 
@@ -36,29 +39,29 @@ class Sampler():
         inverseScale=1/scale
         frames=CHUNK
         data=0
-
+        pointer=self.wave.tell()
 
         if scale<1:
             frames=int(CHUNK*inverseScale)
 
-        if (frames+self.index>self.wave.getnframes()):
-            print("LP out of range, overplayed")
-            sys.exit(0)
-
-
-        if not reverse and self.wave.tell()==self.index:
+        #read frames, required data is not in memory yet
+        if not reverse and pointer<=self.index:
+            #clearing dispensable bytes from index, caused by overrunning increment of index
+            if self.index>pointer:
+                self.index=pointer
             data=self.wave.readframes(frames)
             self.savedReversedData+=data
             self.savedData=""
             self.index+=frames
 
+        #required data has been already played and is stored in memory
         else:
-
             if reverse:
                 ind=len(self.savedReversedData)-frames*4
-                data=self.savedReversedData[ind:]
+                audio_data=self.savedReversedData[ind:]
+                data=audioop.reverse(audio_data,self.sampleWidth)
                 self.savedReversedData=self.savedReversedData[:ind]
-                self.savedData=data+self.savedData
+                self.savedData=audio_data+self.savedData
                 self.index-=frames
             else:
                 ind=frames*4
@@ -67,41 +70,29 @@ class Sampler():
                 self.savedReversedData+=data
                 self.index+=frames
 
-        if len(data)==0:
-            #TODO: why?
-            print(reverse,scale)
-            return 0
-
-        if reverse:
-            data = audioop.reverse(data,self.wave.getsampwidth())
-
-
+        #resample data if any scale is given
         if scale!=1:
-
             audio_data = numpy.fromstring(data, dtype=numpy.int16)
             output=self.resample(audio_data,scale)
             string_audio_data=output.astype(numpy.int16).tostring()
-
         else:
             string_audio_data=data
 
+        #iterate over string_audio_data and write 4096 byte into stream for each iteration
         for i in range(0,len(string_audio_data),len(data)):
-             self.stream.write(string_audio_data[i:i+len(data)])
+            self.stream.write(string_audio_data[i:i+len(data)])
 
         return frames
 
     def play(self,reverse,scale):
-
         CHUNK = 1024
         index=0
         if reverse:
             index=self.wave.getnframes()-CHUNK
             self.wave.setpos(index)
 
-
         while True:
             border=self.playPart(reverse,scale)
-
             if reverse:
                 index-=border
                 if index<0:
@@ -112,7 +103,6 @@ class Sampler():
                 if index>=self.wave.getnframes():
                     break
 
-
         self.stream.stop_stream()
         self.stream.close()
         self.audio.terminate()
@@ -120,27 +110,53 @@ class Sampler():
 if __name__=="__main__":
 
     sa=Sampler("output/file.wav")
-    #sa.play(False,0.3)
-    vectorSpeed=[1 for i in range(1000)]
-    vectorSpeed+=[(j/510) for j in range(200,510,5)[::-1]]
-    vectorSpeed+=[(k/800) for k in range(200,800,5)]
-    vectorSpeed+=[(k/800) for k in range(200,800,5)[::-1]]
-    vectorSpeed+=[1 for i in range(1000)]
+    #sa.play(False,0.01)
+
+
+    vectorSpeed=[0.75 for i in range(2000)]
+    vectorSpeed+=[(j/50) for j in range(1,50,10)[::-1]]
+    vectorSpeed+=[(k/100) for k in range(1,200,12)]
+    vectorSpeed+=[0.75 for i in range(200)]
+    vectorSpeed+=[(k/100) for k in range(1,150,12)]
+    vectorSpeed+=[150/100 for i in range(500)]
+    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    vectorSpeed+=[1 for i in range(300)]
 
     # for s in vectorSpeed:
     #     sa.playPart(False,s)
 
     vectorReverse=[False for i in range(1000)]
-    vectorReverse+=[True for i in range(250)]
-    vectorReverse+=[False for i in range(250)]
-    vectorReverse+=[True for i in range(250)]
-    vectorReverse+=[False for i in range(325)]
-    vectorReverse+=[True for i in range(500)]
-
+    vectorReverse+=[True for i in range(100)]
+    vectorReverse+=[False for i in range(500)]
+    vectorReverse+=[True for i in range(750)]
+    vectorReverse+=[False for i in range(500)]
+    vectorReverse+=[False for i in range(500)]
+    vectorReverse+=[True for i in range(750)]
+    vectorReverse+=[False for i in range(500)]
+    vectorReverse+=[False for i in range(500)]
+    vectorReverse+=[True for i in range(750)]
+    vectorReverse+=[False for i in range(500)]
 
     # for r in vectorReverse:
     #     sa.playPart(r,1)
 
 
-    for i in range(len(vectorSpeed)):
-        sa.playPart(vectorReverse[i],vectorSpeed[i])
+    speedCounter=0
+    reverseCounter=0
+    while True:
+        if speedCounter>=len(vectorSpeed):
+            speedCounter=0
+        if reverseCounter>=len(vectorReverse):
+            reverseCounter=0
+
+        sa.playPart(vectorReverse[reverseCounter],vectorSpeed[speedCounter])
+        reverseCounter+=1
+        speedCounter+=1
