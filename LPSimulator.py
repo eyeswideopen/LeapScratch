@@ -21,18 +21,22 @@ class LP(Thread):
 
         self.rotationDelta=(360*(self.revolution/60))/100 #delta for every millisecond depending on revolutions per minute
 
-
+        self.stopped=False
         self.t=time.time()
         self.start()
 
+    def addToRotation(self,angle):
+        self.rotation+=angle
 
     def run(self):
-         pass
-    #     while self.running:
-    #         if self.rotation>=360:
-    #             self.rotation=0
-    #         self.rotation+=self.rotationDelta
-    #         time.sleep(0.01)
+
+        while self.running:
+            if self.stopped:
+                continue
+            if self.rotation>=360:
+                self.rotation=0
+            self.rotation+=self.rotationDelta
+            time.sleep(0.01)
 
     def stop(self):
         self.running=False

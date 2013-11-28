@@ -5,16 +5,25 @@ from threading import Thread
 
 from LPSimulator import LP
 
+from Visualisation import Visualisation
+
+import pygame
+
 class Controller(Observer,Thread):
     def __init__(self,filePath):
         Thread.__init__(self)
         Observer.__init__(self)
 
-        self.lp=LP(0,0,50)
+        radius=150
+
+        self.lp=LP(0,0,radius)
         self.sampler=Sampler(filePath)
 
         self.leapAccess=Access()
         self.leapAccess.register(self)
+
+        self.visualisation=Visualisation(radius)
+        self.visualisation.start()
 
         self.reverse=False
         self.scale=1
@@ -38,26 +47,30 @@ class Controller(Observer,Thread):
 
     def notify(self):
 
+
         if not self.leapAccess.hand:
+            self.lp.stopped=False
             self.scale=1
             self.reverse=False
+            self.visualisation.pointing=False
+            self.visualisation.setAngle(self.lp.rotation)
             return
 
         data=self.leapAccess.getPath()
 
-        # s=data[0]
-        # d=self.lp.getDistance(s["x"],s["y"])
-        #
-        # normalSpeed=self.lp.getCircumferentialSpeed()
-        #
-        # speed=self.lp.getCircumferentialSpeed(d)
-        #scale=speed/normalSpeed
-
 
         if len(data)>1:
+
+            self.lp.stopped=True
+
+            self.visualisation.pointing=True
+            self.visualisation.setPoint(data[-1]["x"],data[-1]["y"])
+
+
             angle=self.lp.getAngle(data[-1]["x"],data[-1]["y"],data[-2]["x"],data[-2]["y"])
             self.scale=1/(angle/self.lp.rotationDelta)
 
+            self.visualisation.turn(-angle)
 
             if angle<0:
                 self.reverse=True
@@ -66,7 +79,8 @@ class Controller(Observer,Thread):
 
             self.scale=abs(self.scale)
 
-            #print(self.scale)
+            self.lp.addToRotation(-angle)
+
 
 
 
