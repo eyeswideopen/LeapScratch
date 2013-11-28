@@ -110,7 +110,7 @@ class Sampler():
 if __name__=="__main__":
 
     sa=Sampler("output/file.wav")
-    #sa.play(False,0.01)
+    sa.play(False,0.25)
 
 
     vectorSpeed=[0.75 for i in range(2000)]
@@ -149,14 +149,14 @@ if __name__=="__main__":
     #     sa.playPart(r,1)
 
 
-    speedCounter=0
-    reverseCounter=0
-    while True:
-        if speedCounter>=len(vectorSpeed):
-            speedCounter=0
-        if reverseCounter>=len(vectorReverse):
-            reverseCounter=0
-
-        sa.playPart(vectorReverse[reverseCounter],vectorSpeed[speedCounter])
-        reverseCounter+=1
-        speedCounter+=1
+    # speedCounter=0
+    # reverseCounter=0
+    # while True:
+    #     if speedCounter>=len(vectorSpeed):
+    #         speedCounter=0
+    #     if reverseCounter>=len(vectorReverse):
+    #         reverseCounter=0
+    #
+    #     sa.playPart(vectorReverse[reverseCounter],vectorSpeed[speedCounter])
+    #     reverseCounter+=1
+    #     speedCounter+=1
