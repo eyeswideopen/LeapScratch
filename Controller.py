@@ -7,7 +7,6 @@ from LPSimulator import LP
 
 from Visualisation import Visualisation
 
-import pygame
 
 class Controller(Observer,Thread):
     def __init__(self,filePath):
@@ -22,7 +21,7 @@ class Controller(Observer,Thread):
         self.leapAccess=Access()
         self.leapAccess.register(self)
 
-        self.visualisation=Visualisation(radius)
+        self.visualisation=Visualisation(self.lp)
         self.visualisation.start()
 
         self.reverse=False
@@ -30,7 +29,6 @@ class Controller(Observer,Thread):
 
         self.start()
         self.leapAccess.start()
-
 
 
     def run(self):
@@ -53,24 +51,22 @@ class Controller(Observer,Thread):
             self.scale=1
             self.reverse=False
             self.visualisation.pointing=False
-            self.visualisation.setAngle(self.lp.rotation)
             return
 
-        data=self.leapAccess.getPath()
+        path=self.leapAccess.getPath()
 
 
-        if len(data)>1:
+        if len(path)>1:
 
             self.lp.stopped=True
 
             self.visualisation.pointing=True
-            self.visualisation.setPoint(data[-1]["x"],data[-1]["y"])
+            self.visualisation.setPoint(path[-1]["x"],path[-1]["y"])
 
 
-            angle=self.lp.getAngle(data[-1]["x"],data[-1]["y"],data[-2]["x"],data[-2]["y"])
+            angle=self.lp.getAngle(path[-1]["x"],path[-1]["y"],path[-2]["x"],path[-2]["y"])
             self.scale=1/(angle/self.lp.rotationDelta)
 
-            self.visualisation.turn(-angle)
 
             if angle<0:
                 self.reverse=True
@@ -82,9 +78,5 @@ class Controller(Observer,Thread):
             self.lp.addToRotation(-angle)
 
 
-
-
-
 if __name__=="__main__":
     c=Controller("output/file.wav")
-

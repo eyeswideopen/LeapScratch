@@ -3,7 +3,7 @@ import pygame,sys
 from threading import Thread
 
 
-class Longplayer(pygame.sprite.Sprite):
+class LongplayerSprite(pygame.sprite.Sprite):
 
     def __init__(self,x,y,radius):
         pygame.sprite.Sprite.__init__(self)
@@ -28,11 +28,9 @@ class Longplayer(pygame.sprite.Sprite):
 
 
 
-
-
     def update(self):
         oldCenter = self.rect.center
-        self.image = pygame.transform.rotate(self.imageMaster, self.dir)
+        self.image = pygame.transform.rotate(self.imageMaster, int(self.dir))
 
         self.rect = self.image.get_rect()
         self.rect.x=self.x
@@ -44,33 +42,24 @@ class Longplayer(pygame.sprite.Sprite):
 
 class Visualisation(Thread):
 
-
-    def __init__(self,radius):
+    def __init__(self,lp):
         Thread.__init__(self)
         # Initialize the game engine
 
-
+        self.lp=lp
         self.width=600
         self.height=480
-        self.radius=radius
 
         self.point=[0,0,5,5]
 
         self.pointing=False
 
-        self.lp=None
+        self.sprite=None
 
     def setPoint(self,x,y):
         self.point[0]=x+self.width/2
         self.point[1]=y+self.height/2
 
-    def turn(self,angle):
-        if self.lp:
-            self.lp.dir+=angle
-
-    def setAngle(self,angle):
-        if self.lp:
-            self.lp.dir=angle
 
     def run(self):
         pygame.init()
@@ -78,12 +67,16 @@ class Visualisation(Thread):
         screen=pygame.display.set_mode((self.width,self.height))
 
         self.clock = pygame.time.Clock()
-        self.lp=Longplayer(self.width/2-self.radius,self.height/2-self.radius,self.radius)
+        self.sprite=LongplayerSprite(self.width/2-self.lp.radius,self.height/2-self.lp.radius,self.lp.radius)
 
-        allSprites = pygame.sprite.Group(self.lp)
+        allSprites = pygame.sprite.Group(self.sprite)
 
 
         while True:
+            if self.sprite:
+                self.sprite.dir=self.lp.rotation
+
+            allSprites.update()
 
             screen.fill((0,0,0))
 
@@ -97,12 +90,10 @@ class Visualisation(Thread):
                     sys.exit(0)
 
 
-
             if self.pointing:
                 pygame.draw.ellipse(screen,(0,0,255),self.point)
 
 
-            allSprites.update()
             allSprites.draw(screen)
 
             if self.pointing:
