@@ -1,6 +1,6 @@
 from Observer import Observer
 from LeapAccsess import Access
-from audio_long import Sampler
+from AudioPlayer import Sampler
 from threading import Thread
 
 from LPSimulator import LP
