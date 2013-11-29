@@ -1,7 +1,5 @@
 import pygame,sys
-
 from threading import Thread
-
 
 class LongplayerSprite(pygame.sprite.Sprite):
 
@@ -10,9 +8,7 @@ class LongplayerSprite(pygame.sprite.Sprite):
         self.imageMaster = pygame.image.load("resources/platte.png")
         self.imageMaster = self.imageMaster.convert()
 
-
         self.diameter=radius*2
-
         self.dir = 0
 
         self.imageMaster=pygame.transform.scale(self.imageMaster,(self.diameter,self.diameter))
@@ -27,7 +23,6 @@ class LongplayerSprite(pygame.sprite.Sprite):
         self.rect.y=self.y
 
 
-
     def update(self):
         oldCenter = self.rect.center
         self.image = pygame.transform.rotate(self.imageMaster, int(self.dir))
@@ -36,8 +31,6 @@ class LongplayerSprite(pygame.sprite.Sprite):
         self.rect.x=self.x
         self.rect.y=self.y
         self.rect.center = oldCenter
-
-
 
 
 class Visualisation(Thread):
@@ -60,7 +53,6 @@ class Visualisation(Thread):
         self.point[0]=x+self.width/2
         self.point[1]=y+self.height/2
 
-
     def run(self):
         pygame.init()
 
@@ -70,7 +62,6 @@ class Visualisation(Thread):
         self.sprite=LongplayerSprite(self.width/2-self.lp.radius,self.height/2-self.lp.radius,self.lp.radius)
 
         allSprites = pygame.sprite.Group(self.sprite)
-
 
         while True:
             if self.sprite:
@@ -101,12 +92,7 @@ class Visualisation(Thread):
 
             pygame.display.flip()
 
-
-
-
-        # Be IDLE friendly
         pygame.quit ()
-
 
 if __name__=="__main__":
     v=Visualisation()

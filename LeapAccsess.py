@@ -1,7 +1,5 @@
-
 import sys
 sys.path.append("lib")
-
 
 import Leap
 from Observable import Observable
@@ -14,7 +12,6 @@ class Access(Leap.Listener,Observable):
         Observable.__init__(self)
         self.path=[]
         self.hand=False
-
 
     def start(self):
         controller = Leap.Controller()
@@ -37,15 +34,12 @@ class Access(Leap.Listener,Observable):
     def on_exit(self, controller):
         print "Exited"
 
-
     def getPath(self):
         return self.path
-
 
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
         frame = controller.frame()
-
 
         if not frame.hands.is_empty:
             hand = frame.hands.rightmost
@@ -73,14 +67,11 @@ class Access(Leap.Listener,Observable):
                 self.hand=False
                 self.path=[]
 
-
         elif len(self.path)>0:
             self.hand=False
             self.path=[]
 
-
         self.notifyObservers()
-
 
 
 if __name__=="__main__":
