@@ -1,99 +1,64 @@
-import pygame,sys
-from threading import Thread
+import pyglet
 
-class LongplayerSprite(pygame.sprite.Sprite):
-
-    def __init__(self,x,y,radius):
-        pygame.sprite.Sprite.__init__(self)
-        self.imageMaster = pygame.image.load("resources/platte.png")
-        self.imageMaster = self.imageMaster.convert()
-
-        self.diameter=radius*2
-        self.dir = 0
-
-        self.imageMaster=pygame.transform.scale(self.imageMaster,(self.diameter,self.diameter))
-        self.image = self.imageMaster
-        self.rect = self.image.get_rect()
-
-        self.rect.center = (radius, radius)
-
-        self.x=x
-        self.y=y
-        self.rect.x=self.x
-        self.rect.y=self.y
-
-
-    def update(self):
-        oldCenter = self.rect.center
-        self.image = pygame.transform.rotate(self.imageMaster, int(self.dir))
-
-        self.rect = self.image.get_rect()
-        self.rect.x=self.x
-        self.rect.y=self.y
-        self.rect.center = oldCenter
-
-
-class Visualisation(Thread):
+class Visualisation(pyglet.window.Window):
 
     def __init__(self,lp):
-        Thread.__init__(self)
-        # Initialize the game engine
-
+        self.w=int(600)
+        self.h=int(480)
+        pyglet.window.Window.__init__(self,self.w,self.h)
         self.lp=lp
-        self.width=600
-        self.height=480
+        self.pointing=False
 
-        self.point=[0,0,5,5]
+        pic = pyglet.image.load('resources/platte.png')
+        pic.anchor_x = pic.width /2
+        pic.anchor_y = pic.height / 2
+
+        self.sprite=pyglet.sprite.Sprite(pic,self.w/2,self.h/2)
+
+        scale=lp.radius*2/pic.width
+        self.sprite.scale=scale
+        self.dir=0
+
+        pic = pyglet.image.load('resources/hand.png')
+        pic.anchor_y = pic.height
+        self.cursor=pyglet.sprite.Sprite(pic)
+
+        pyglet.clock.set_fps_limit(60)
+        self.drawingFunc=lambda x:x
+        pyglet.clock.schedule(self.drawingFunc)
 
         self.pointing=False
 
-        self.sprite=None
 
-    def setPoint(self,x,y):
-        self.point[0]=x+self.width/2
-        self.point[1]=y+self.height/2
+    # def on_mouse_press(self,x, y, button, modifiers):
+    #     self.pointing=True
+    #     self.setCursor(x,y)
+    #
+    # def on_mouse_drag(self,x, y, dx, dy, buttons, modifiers):
+    #     self.pointing=True
+    #     self.setCursor(x,y)
+    #
+    #
+    # def on_mouse_release(self,x, y, button, modifiers):
+    #     self.pointing=False
 
-    def run(self):
-        pygame.init()
+    def setCursor(self,x,y):
+        self.cursor.x=x
+        self.cursor.y=y
 
-        screen=pygame.display.set_mode((self.width,self.height))
-
-        self.clock = pygame.time.Clock()
-        self.sprite=LongplayerSprite(self.width/2-self.lp.radius,self.height/2-self.lp.radius,self.lp.radius)
-
-        allSprites = pygame.sprite.Group(self.sprite)
-
-        while True:
-            if self.sprite:
-                self.sprite.dir=self.lp.rotation
-
-            allSprites.update()
-
-            screen.fill((0,0,0))
+    def start(self):
+        pyglet.app.run()
 
 
-            # This limits the while loop to a max of 10 times per second.
-            # Leave this out and we will use all CPU we can.
-            self.clock.tick(10)
+    def on_draw(self):
+        self.clear()
+        self.sprite.rotation=self.lp.rotation
+        self.sprite.draw()
+        if self.pointing:
+            self.cursor.draw()
 
-            for event in pygame.event.get(): # User did something
-                if event.type == pygame.QUIT: # If user clicked close
-                    sys.exit(0)
-
-
-            if self.pointing:
-                pygame.draw.ellipse(screen,(0,0,255),self.point)
-
-
-            allSprites.draw(screen)
-
-            if self.pointing:
-                pygame.draw.ellipse(screen,(0,0,255),self.point)
-
-            pygame.display.flip()
-
-        pygame.quit ()
 
 if __name__=="__main__":
-    v=Visualisation()
+    from LPSimulator import LP
+    v=Visualisation(LP(0,0,50))
     v.start()
