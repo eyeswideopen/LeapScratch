@@ -16,10 +16,11 @@ class Controller(Observer,Thread):
         self.leapAccess=Access()
         self.leapAccess.register(self)
         self.visualisation=Visualisation(self.lp)
-        self.visualisation.start()
         self.reverse=False
         self.scale=1
         self.start()
+        self.visualisation.start()
+
         self.leapAccess.start()
 
 
@@ -49,7 +50,7 @@ class Controller(Observer,Thread):
             self.lp.stopped=True
 
             self.visualisation.pointing=True
-            self.visualisation.setPoint(path[-1]["x"],path[-1]["y"])
+            self.visualisation.setCursor(path[-1]["x"],path[-1]["y"])
 
             angle=self.lp.getAngle(path[-1]["x"],path[-1]["y"],path[-2]["x"],path[-2]["y"])
             self.scale=1/(angle/self.lp.rotationDelta)
@@ -60,7 +61,7 @@ class Controller(Observer,Thread):
                 self.reverse=False
 
             self.scale=abs(self.scale)
-            self.lp.addToRotation(-angle)
+            self.lp.addToRotation(angle)
 
 
 if __name__=="__main__":
