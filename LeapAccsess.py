@@ -7,11 +7,10 @@ from Observable import Observable
 class Access(Leap.Listener,Observable):
 
     def __init__(self):
-
+        Leap.Listener.__init__(self)
         Observable.__init__(self)
         self.path=[]
         self.hand=False
-        self.p=None
 
     def start(self):
         controller = Leap.Controller()
