@@ -1,22 +1,25 @@
-import sys
+import sys,os
 sys.path.append("lib")
 
 import Leap
 from Observable import Observable
 
-
 class Access(Leap.Listener,Observable):
 
     def __init__(self):
-        Leap.Listener.__init__(self)
+
         Observable.__init__(self)
         self.path=[]
         self.hand=False
+        self.p=None
 
     def start(self):
         controller = Leap.Controller()
         controller.add_listener(self)
-        sys.stdin.readlines()
+        sys.stdin.readline()
+
+    def stop(self):
+        os._exit(0)
 
     def on_connect(self, controller):
         print "Connected"
@@ -38,6 +41,7 @@ class Access(Leap.Listener,Observable):
         return self.path
 
     def on_frame(self, controller):
+
         # Get the most recent frame and report some basic information
         frame = controller.frame()
 

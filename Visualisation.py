@@ -1,62 +1,63 @@
-import pyglet
+from threading import Thread
 
-class Visualisation(pyglet.window.Window):
+import os
 
+class Visualisation():
     def __init__(self,lp):
-        self.w=int(600)
-        self.h=int(480)
-        pyglet.window.Window.__init__(self,self.w,self.h)
         self.lp=lp
-        self.pointing=False
-
-        pic = pyglet.image.load('resources/platte.png')
-        pic.anchor_x = pic.width /2
-        pic.anchor_y = pic.height / 2
-
-        self.sprite=pyglet.sprite.Sprite(pic,self.w/2,self.h/2)
-
-        scale=lp.radius*2/pic.width
-        self.sprite.scale=scale
         self.dir=0
-
-        pic = pyglet.image.load('resources/hand.png')
-        pic.anchor_y = pic.height
-        self.cursor=pyglet.sprite.Sprite(pic)
-
-        pyglet.clock.set_fps_limit(60)
-        self.drawingFunc=lambda x:x
-        pyglet.clock.schedule(self.drawingFunc)
-
         self.pointing=False
+        self.cursor=None
 
-
-    # def on_mouse_press(self,x, y, button, modifiers):
-    #     self.pointing=True
-    #     self.setCursor(x,y)
-    #
-    # def on_mouse_drag(self,x, y, dx, dy, buttons, modifiers):
-    #     self.pointing=True
-    #     self.setCursor(x,y)
-    #
-    #
-    # def on_mouse_release(self,x, y, button, modifiers):
-    #     self.pointing=False
-
-    def setCursor(self,x,y):
-        self.cursor.x=x
-        self.cursor.y=y
 
     def start(self):
-        pyglet.app.run()
+        def event_loop():
+            import pyglet
+
+            width=600
+            height=480
+
+            w=pyglet.window.Window(width,height)
+
+            pic = pyglet.image.load('resources/hand.png')
+            pic.anchor_y = pic.height
+            self.cursor=pyglet.sprite.Sprite(pic)
+
+            pic = pyglet.image.load('resources/platte.png')
+            pic.anchor_x = pic.width /2
+            pic.anchor_y = pic.height / 2
+
+            sprite=pyglet.sprite.Sprite(pic,width/2,height/2)
+
+            scale=self.lp.radius*2/pic.width
+            sprite.scale=scale
+
+            def close():
+                os._exit(0)
+
+            w.on_close=close
+
+            def draw(e):
+                w.clear()
+                sprite.rotation=self.lp.rotation
+                sprite.draw()
+
+                if self.pointing:
+                    self.cursor.draw()
+
+            #pyglet.clock.set_fps_limit(60)
+            pyglet.clock.schedule(draw)
+
+            pyglet.app.run()
 
 
-    def on_draw(self):
-        self.clear()
-        self.sprite.rotation=self.lp.rotation
-        self.sprite.draw()
-        if self.pointing:
-            self.cursor.draw()
+        t = Thread(target=event_loop)
+        t.start()
 
+    def setCursor(self,x,y):
+        if self.cursor:
+            self.cursor.x=x
+            self.cursor.y=y
 
 if __name__=="__main__":
     from LPSimulator import LP

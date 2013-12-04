@@ -15,10 +15,10 @@ class Controller(Observer,Thread):
         self.sampler=Sampler(filePath)
         self.leapAccess=Access()
         self.leapAccess.register(self)
-        self.visualisation=Visualisation(self.lp)
         self.reverse=False
         self.scale=1
         self.start()
+        self.visualisation=Visualisation(self.lp)
         self.visualisation.start()
 
         self.leapAccess.start()
@@ -33,6 +33,7 @@ class Controller(Observer,Thread):
                 #     print("to low")
                 continue
             self.sampler.playPart(self.reverse,self.scale)
+
 
 
     def notify(self):
