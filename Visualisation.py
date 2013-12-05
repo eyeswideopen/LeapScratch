@@ -8,14 +8,16 @@ class Visualisation():
         self.dir=0
         self.pointing=False
         self.cursor=None
+        self.width=600
+        self.height=480
 
 
     def start(self):
         def event_loop():
             import pyglet
 
-            width=600
-            height=480
+            width=self.width
+            height=self.height
 
             w=pyglet.window.Window(width,height)
 
@@ -42,6 +44,7 @@ class Visualisation():
                 sprite.rotation=self.lp.rotation
                 sprite.draw()
 
+
                 if self.pointing:
                     self.cursor.draw()
 
@@ -56,8 +59,8 @@ class Visualisation():
 
     def setCursor(self,x,y):
         if self.cursor:
-            self.cursor.x=x
-            self.cursor.y=y
+            self.cursor.x=x+self.width/2
+            self.cursor.y=-y+self.height/2
 
 if __name__=="__main__":
     from LPSimulator import LP

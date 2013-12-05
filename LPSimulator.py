@@ -33,8 +33,8 @@ class LP(Thread):
         while self.running:
             if self.stopped:
                 continue
-            if self.rotation>=360:
-                self.rotation=0
+            # if self.rotation>=360:
+            #     self.rotation=0
             self.rotation+=self.rotationDelta
             time.sleep(0.01)
 
