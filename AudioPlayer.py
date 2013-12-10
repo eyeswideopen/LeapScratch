@@ -27,7 +27,13 @@ class Sampler():
             smp,
             )
 
-    def playPart(self,reverse,scale):
+    def playPart(self,scale):
+
+        if scale is 0:
+            return
+
+        reverse=True if scale<0 else False
+
         if self.index>=self.length:
             print("LP out of range, overplayed")
             sys.exit(0)
@@ -90,9 +96,10 @@ class Sampler():
         if reverse:
             index=self.wave.getnframes()-CHUNK
             self.wave.setpos(index)
+            scale*=1
 
         while True:
-            border=self.playPart(reverse,scale)
+            border=self.playPart(scale)
             if reverse:
                 index-=border
                 if index<0:
@@ -109,8 +116,8 @@ class Sampler():
 
 if __name__=="__main__":
 
-    sa=Sampler("output/file.wav")
-    sa.play(False,0.25)
+    sa=Sampler("output/file2.wav")
+    sa.play(False,0.5)
 
 
     vectorSpeed=[0.75 for i in range(2000)]

@@ -19,10 +19,10 @@ class LP(Thread):
         self.rotation=0
         self.running=True
 
-        self.rotationDelta=(360*(self.revolution/60))/100 #delta for every millisecond depending on revolutions per minute
+        self.degreesPerMillisecond=(360*(self.revolution/60))/1000 #delta for every millisecond depending on revolutions per minute
 
         self.stopped=False
-        self.t=time.time()
+        self.timestamp=time.time()
         self.start()
 
     def addToRotation(self,angle):
@@ -35,11 +35,14 @@ class LP(Thread):
                 continue
             # if self.rotation>=360:
             #     self.rotation=0
-            self.rotation+=self.rotationDelta
-            time.sleep(0.01)
+            self.rotation+=self.degreesPerMillisecond
+            time.sleep(0.001)
 
     def stop(self):
         self.running=False
+
+
+
 
     def getAngle(self,_x,_y,px,py):
         alpha1 =math.atan((_x-self.x) / (_y-self.y))
@@ -47,6 +50,25 @@ class LP(Thread):
         alpha = alpha2 - alpha1
 
         return math.degrees(alpha)
+
+
+
+
+
+
+    # def getAngle(self,_x,_y,px,py):
+    #     v1=[_x,_y]
+    #     v2=[px,py]
+    #
+    #     def dotproduct(v1, v2):
+    #         return sum((a*b) for a, b in zip(v1, v2))
+    #
+    #     def length(v):
+    #       return math.sqrt(dotproduct(v, v))
+    #
+    #     angle=math.acos(dotproduct(v1, v2) / (length(v1) * length(v2)))
+    #     print math.degrees(angle)
+    #     return math.degrees(angle)
 
     def getCircumferentialSpeed(self,d=None):
         dia=self.radius*2

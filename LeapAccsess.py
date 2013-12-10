@@ -3,14 +3,14 @@ import sys, os,math
 sys.path.append("lib")
 
 import Leap
-from Observable import Observable
 
+import collections
 
-class Access(Leap.Listener, Observable):
+class Access(Leap.Listener):
     def __init__(self):
         Leap.Listener.__init__(self)
-        Observable.__init__(self)
-        self.path = []
+        self.path = collections.deque(maxlen=1000)
+
         self.tracking = False
         self.lastDistx=None
         self.lastDisty=None
@@ -86,7 +86,7 @@ class Access(Leap.Listener, Observable):
 
                 if self.lastDistx and self.lastDisty:
                     if handPos.x<self.lastPointingPos.x:
-                        handPos.x+self.lastDistx
+                        handPos.x+=self.lastDistx
                     else:
                         handPos.x-=self.lastDistx
     
@@ -107,15 +107,14 @@ class Access(Leap.Listener, Observable):
                     self.tracking=True
 
                 else:
-                    self.path = []
+                    self.path.clear()
                     self.tracking = False
 
         else:
             self.tracking = False
-            self.path = []
+            self.path.clear()
             self.point=None
 
-        self.notifyObservers()
 
 
 if __name__ == "__main__":
