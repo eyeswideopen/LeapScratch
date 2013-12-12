@@ -1,21 +1,15 @@
-from Observer import Observer
-from LeapAccsess import Access
+from Test import Access
 from AudioPlayerCB import Sampler
 from threading import Thread
 from LPSimulator import LP
 from Visualisation import Visualisation
 
-import collections
-
-import sci
-
 import time
 
 
-class Controller(Observer, Thread):
+class Controller( Thread):
     def __init__(self, filePath):
         Thread.__init__(self)
-        Observer.__init__(self)
 
         radius = 150
         self.lp = LP(0, 0, radius)
@@ -29,8 +23,11 @@ class Controller(Observer, Thread):
         self.timestamp=None
         self.prevTimestamp=None
 
+        self.prevx=None
+
         self.start()
-        #self.visualisation.start()
+
+        self.visualisation.start()
 
         self.leapAccess.start()
 
@@ -74,26 +71,62 @@ class Controller(Observer, Thread):
 
         path=self.leapAccess.path
 
-        if not self.prevCoordinate and len(path)>=2:
-            self.prevCoordinate=path.popleft()
-            self.prevTimestamp=int(round(time.time() * 1000))
-        elif not self.prevCoordinate:
-            return 1
+        try:
+            x=path.pop()
 
-        if len(path)>=1:
-            coordinate=path.pop()
-            self.timestamp=int(round(time.time() * 1000))
-            path.clear()
-            scale= self.calculateScale(self.prevCoordinate["x"],self.prevCoordinate["y"],coordinate["x"],coordinate["y"])
-            self.prevCoordinate=coordinate
-            self.prevTimestamp=self.timestamp
+            if not self.prevx:
+                self.prevx=x
 
+
+            dist=self.prevx-x
+
+            norm=2
+
+            self.prevx=x
+
+
+            scale= 1/(dist/norm)
+
+            if abs(scale)<0.1:
+                scale= 1
+            elif abs(scale)>3:
+                scale= 0
+
+            print scale
             return scale
-        elif not self.leapAccess.tracking:
-            self.lp.stopped = False
-            self.visualisation.pointing = False
+
+            # if x<1 and x>-1:
+            #     return 0
+            #
+            # elif x>0:
+            #     return 1/(abs(2*x)/-150)
+            # return 1/(abs(2*x)/150)
+
+        except Exception as e:
+            print e
+            path.clear()
             return 1
-        return 0
+
+        # if not self.prevCoordinate and len(path)>=2:
+        #     self.prevCoordinate=path.popleft()
+        #     self.prevTimestamp=int(round(time.time() * 1000))
+        # elif not self.prevCoordinate:
+        #     return 1
+        #
+        # if len(path)>=1:
+        #     coordinate=path.pop()
+        #     self.timestamp=int(round(time.time() * 1000))
+        #     path.clear()
+        #     scale= self.calculateScale(self.prevCoordinate["x"],self.prevCoordinate["y"],coordinate["x"],coordinate["y"])
+        #     self.prevCoordinate=coordinate
+        #     self.prevTimestamp=self.timestamp
+        #
+        #     return scale
+        # elif not self.leapAccess.tracking:
+        #     self.lp.stopped = False
+        #     self.visualisation.pointing = False
+        #     return 1
+        # return 0
 
 
 
@@ -186,4 +219,4 @@ class Controller(Observer, Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("output/file2.wav")
+    c = Controller("output/vocal.wav")

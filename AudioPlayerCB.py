@@ -2,6 +2,8 @@ from __future__ import division
 import wave, audioop, pyaudio, numpy, sys, time
 
 
+import scipy.signal as scipy
+
 class Sampler():
     def __init__(self, waveFile,calculationMethod):
         self.calculationMethod=calculationMethod
@@ -29,7 +31,7 @@ class Sampler():
 
     def callback(self, in_data, frame_count, time_info, status):
 
-        blocks=8
+        blocks=1
 
         if self.index >= self.length:
             print("LP out of range, overplayed")
@@ -41,7 +43,8 @@ class Sampler():
         if self.counter==0:
             scale=self.calculationMethod()
 
-            print scale
+            # if scale !=1:
+            #     print scale
 
             CHUNK = 1024*blocks
 
@@ -104,6 +107,8 @@ class Sampler():
                 #print("enes:" ,len(data)*scale)
 
                 output = self.resample(audio_data, scale)
+                #output = scipy.resample(audio_data, int(len(audio_data)*scale))
+
                 self.string_audio_data = output.astype(numpy.int16).tostring()
             else:
                 self.string_audio_data = data
@@ -132,7 +137,7 @@ class Sampler():
 
         returnData=self.string_audio_data[self.counter*4096:self.counter*4096+4096]
 
-        print (self.counter,len(returnData))
+        #print (self.counter,len(returnData))
 
         self.counter+=1
 

@@ -1,6 +1,8 @@
 from __future__ import division
 import wave,audioop,pyaudio,numpy,sys
 
+import scipy.signal as scipy
+
 class Sampler():
 
     def __init__(self,waveFile):
@@ -21,6 +23,8 @@ class Sampler():
 
         n = round(len(smp) * scale)
 
+        print n
+
         return numpy.interp(
             numpy.linspace(0.0, 1.0, n, endpoint=False),
             numpy.linspace(0.0, 1.0, len(smp), endpoint=False),
@@ -29,10 +33,14 @@ class Sampler():
 
     def playPart(self,scale):
 
+        print scale
+
         if scale is 0:
             return
 
         reverse=True if scale<0 else False
+
+        scale=abs(scale)
 
         if self.index>=self.length:
             print("LP out of range, overplayed")
@@ -78,8 +86,11 @@ class Sampler():
 
         #resample data if any scale is given
         if scale!=1:
+            print len(data)
             audio_data = numpy.fromstring(data, dtype=numpy.int16)
             output=self.resample(audio_data,scale)
+            #output = scipy.resample(audio_data, int(len(audio_data)*scale))
+
             string_audio_data=output.astype(numpy.int16).tostring()
         else:
             string_audio_data=data
@@ -115,55 +126,80 @@ class Sampler():
         self.audio.terminate()
 
 if __name__=="__main__":
+    sa=Sampler("output/beat.wav")
+    sa.play(False,1)
 
-    sa=Sampler("output/file2.wav")
-    sa.play(False,0.5)
-
-
-    vectorSpeed=[0.75 for i in range(2000)]
-    vectorSpeed+=[(j/50) for j in range(1,50,10)[::-1]]
-    vectorSpeed+=[(k/100) for k in range(1,200,12)]
-    vectorSpeed+=[0.75 for i in range(200)]
-    vectorSpeed+=[(k/100) for k in range(1,150,12)]
-    vectorSpeed+=[150/100 for i in range(500)]
-    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
-    vectorSpeed+=[(k/800) for k in range(1,800,5)]
-    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
-    vectorSpeed+=[(k/800) for k in range(1,800,5)]
-    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
-    vectorSpeed+=[(k/800) for k in range(1,800,5)]
-    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
-    vectorSpeed+=[(k/800) for k in range(1,800,5)]
-    vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
-    vectorSpeed+=[1 for i in range(300)]
-
-    # for s in vectorSpeed:
-    #     sa.playPart(False,s)
-
-    vectorReverse=[False for i in range(1000)]
-    vectorReverse+=[True for i in range(100)]
-    vectorReverse+=[False for i in range(500)]
-    vectorReverse+=[True for i in range(750)]
-    vectorReverse+=[False for i in range(500)]
-    vectorReverse+=[False for i in range(500)]
-    vectorReverse+=[True for i in range(750)]
-    vectorReverse+=[False for i in range(500)]
-    vectorReverse+=[False for i in range(500)]
-    vectorReverse+=[True for i in range(750)]
-    vectorReverse+=[False for i in range(500)]
-
-    # for r in vectorReverse:
-    #     sa.playPart(r,1)
-
-
-    # speedCounter=0
-    # reverseCounter=0
-    # while True:
-    #     if speedCounter>=len(vectorSpeed):
-    #         speedCounter=0
-    #     if reverseCounter>=len(vectorReverse):
-    #         reverseCounter=0
+    # import random
     #
-    #     sa.playPart(vectorReverse[reverseCounter],vectorSpeed[speedCounter])
-    #     reverseCounter+=1
-    #     speedCounter+=1
+    # di=0.5
+    #
+    # for i in range(40):
+    #     sa.playPart(di)
+    #
+    # for i in range(19):
+    #     sa.playPart(-di)
+    #
+    # for i in range(50):
+    #     sa.playPart(di)
+    #
+    # for i in range(60):
+    #     sa.playPart(-di)
+    #
+    # for i in range(40):
+    #     sa.playPart(di)
+    #
+    # for i in range(30):
+    #     sa.playPart(-di)
+    # # for i in range(50):
+    # #     sa.playPart(di)
+    #
+    # #sa.play(False,5)
+    #
+    #
+    # vectorSpeed=[0.75 for i in range(2000)]
+    # vectorSpeed+=[(j/50) for j in range(1,50,10)[::-1]]
+    # vectorSpeed+=[(k/100) for k in range(1,200,12)]
+    # vectorSpeed+=[0.75 for i in range(200)]
+    # vectorSpeed+=[(k/100) for k in range(1,150,12)]
+    # vectorSpeed+=[150/100 for i in range(500)]
+    # vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    # vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    # vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    # vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    # vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    # vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    # vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    # vectorSpeed+=[(k/800) for k in range(1,800,5)]
+    # vectorSpeed+=[(k/800) for k in range(200,700,5)[::-1]]
+    # vectorSpeed+=[1 for i in range(300)]
+    #
+    # # for s in vectorSpeed:
+    # #     sa.playPart(False,s)
+    #
+    # vectorReverse=[False for i in range(1000)]
+    # vectorReverse+=[True for i in range(100)]
+    # vectorReverse+=[False for i in range(500)]
+    # vectorReverse+=[True for i in range(750)]
+    # vectorReverse+=[False for i in range(500)]
+    # vectorReverse+=[False for i in range(500)]
+    # vectorReverse+=[True for i in range(750)]
+    # vectorReverse+=[False for i in range(500)]
+    # vectorReverse+=[False for i in range(500)]
+    # vectorReverse+=[True for i in range(750)]
+    # vectorReverse+=[False for i in range(500)]
+    #
+    # # for r in vectorReverse:
+    # #     sa.playPart(r,1)
+    #
+    #
+    # # speedCounter=0
+    # # reverseCounter=0
+    # # while True:
+    # #     if speedCounter>=len(vectorSpeed):
+    # #         speedCounter=0
+    # #     if reverseCounter>=len(vectorReverse):
+    # #         reverseCounter=0
+    # #
+    # #     sa.playPart(vectorReverse[reverseCounter],vectorSpeed[speedCounter])
+    # #     reverseCounter+=1
+    # #     speedCounter+=1
