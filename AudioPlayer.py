@@ -1,5 +1,6 @@
 from __future__ import division
 import wave,audioop,pyaudio,numpy,sys
+import scipy
 
 import scipy.signal as scipy
 
