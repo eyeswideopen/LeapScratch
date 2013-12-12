@@ -86,15 +86,15 @@ class Access(Leap.Listener):
 
                 if self.lastDistx and self.lastDisty:
                     if handPos.x<self.lastPointingPos.x:
-                        handPos.x+=self.lastDistx
+                        handPos.x-=self.lastDistx
                     else:
                         handPos.x-=self.lastDistx
-    
+
                     if handPos.z<self.lastPointingPos.z:
                         handPos.z+=self.lastDisty
                     else:
                         handPos.z-=self.lastDisty
-                    
+
                 pos=handPos
 
                 # print("after:",self.lastPointingPos.x,self.lastPointingPos.z,handPos.x,handPos.z)

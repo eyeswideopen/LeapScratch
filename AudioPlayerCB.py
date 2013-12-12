@@ -23,105 +23,120 @@ class Sampler():
         self.reverse=False
         self.scale=1
 
+        self.counter=0
+
 
 
     def callback(self, in_data, frame_count, time_info, status):
 
-
-
-        scale=self.calculationMethod()
-
+        blocks=8
 
         if self.index >= self.length:
             print("LP out of range, overplayed")
             sys.exit(0)
 
+        if self.counter==blocks:
+            self.counter=0
 
-        CHUNK = 1024
+        if self.counter==0:
+            scale=self.calculationMethod()
 
+            print scale
 
-        if scale==0:
-            return 4096*"0", pyaudio.paContinue
-
-
-        reverse=False
-        if scale<0:
-            reverse=True
-            scale=abs(scale)
+            CHUNK = 1024*blocks
 
 
 
-        if self.index <= 0 and reverse:
-            print("LP out of range, underplayed")
-            sys.exit(0)
-
-        inverseScale = 1 / scale
-        frames = int(CHUNK)
-
-        data = 0
-        pointer = self.wave.tell()
-
-        if scale != 1:
-            frames = int(CHUNK * inverseScale)
+            if scale==0:
+                return (CHUNK*4)*"0", pyaudio.paContinue
 
 
-        #read frames, required data is not in memory yet
-        if not reverse and pointer <= self.index:
-            #clearing dispensable bytes from index, caused by overrunning increment of index
-            if self.index > pointer:
-                self.index = pointer
-            data = self.wave.readframes(frames)
-            self.savedReversedData += data
-            self.savedData = ""
-            self.index += frames
+            reverse=False
+            if scale<0:
+                reverse=True
+                scale=abs(scale)
 
-        #required data has been already played and is stored in memory
-        else:
-            if reverse:
-                ind = len(self.savedReversedData) - frames * 4
-                audio_data = self.savedReversedData[ind:]
-                data = audioop.reverse(audio_data, self.sampleWidth)
-                self.savedReversedData = self.savedReversedData[:ind]
-                self.savedData = audio_data + self.savedData
-                self.index -= frames
-            else:
-                ind = frames * 4
-                data = self.savedData[:ind]
-                self.savedData = self.savedData[ind:]
+
+
+            if self.index <= 0 and reverse:
+                print("LP out of range, underplayed")
+                sys.exit(0)
+
+            inverseScale = 1 / scale
+            frames = int(CHUNK)
+
+            data = 0
+            pointer = self.wave.tell()
+
+            if scale != 1:
+                frames = int(CHUNK * inverseScale)
+
+
+            #read frames, required data is not in memory yet
+            if not reverse and pointer <= self.index:
+                #clearing dispensable bytes from index, caused by overrunning increment of index
+                if self.index > pointer:
+                    self.index = pointer
+                data = self.wave.readframes(frames)
                 self.savedReversedData += data
+                self.savedData = ""
                 self.index += frames
 
-        #resample data if any scale is given
-        if scale != 1:
-            audio_data = numpy.fromstring(data, dtype=numpy.int16)
-            #print("enes:" ,len(data)*scale)
+            #required data has been already played and is stored in memory
+            else:
+                if reverse:
+                    ind = len(self.savedReversedData) - frames * 4
+                    audio_data = self.savedReversedData[ind:]
+                    data = audioop.reverse(audio_data, self.sampleWidth)
+                    self.savedReversedData = self.savedReversedData[:ind]
+                    self.savedData = audio_data + self.savedData
+                    self.index -= frames
+                else:
+                    ind = frames * 4
+                    data = self.savedData[:ind]
+                    self.savedData = self.savedData[ind:]
+                    self.savedReversedData += data
+                    self.index += frames
 
-            output = self.resample(audio_data, scale)
-            string_audio_data = output.astype(numpy.int16).tostring()
-        else:
-            string_audio_data = data
+            #resample data if any scale is given
+            if scale != 1:
+                audio_data = numpy.fromstring(data, dtype=numpy.int16)
+                #print("enes:" ,len(data)*scale)
 
-        #iterate over string_audio_data and write 4096 byte into stream for each iteration
-        #return_data=""
+                output = self.resample(audio_data, scale)
+                self.string_audio_data = output.astype(numpy.int16).tostring()
+            else:
+                self.string_audio_data = data
 
-
-        # for i in range(0, len(string_audio_data), 4096):
-        #     return_data+=string_audio_data[i:i + len(data)]
-
-        #return frames
-
-        #print '\n'
+            #iterate over string_audio_data and write 4096 byte into stream for each iteration
+            #return_data=""
 
 
-        # if len(string_audio_data)!=4096:
-        #      print len(string_audio_data)
+            # for i in range(0, len(string_audio_data), 4096):
+            #     return_data+=string_audio_data[i:i + len(data)]
 
-        while len(string_audio_data)<CHUNK*4:
-            #print(len(string_audio_data))
-            string_audio_data+=string_audio_data[len(string_audio_data)-1]
+            #return frames
+
+            #print '\n'
 
 
-        return string_audio_data, pyaudio.paContinue
+            # if len(string_audio_data)!=4096:
+            #      print len(string_audio_data)
+
+            while len(self.string_audio_data)<CHUNK*4:
+                #print(len(string_audio_data))
+                self.string_audio_data+=self.string_audio_data[len(self.string_audio_data)-1]
+
+
+
+
+        returnData=self.string_audio_data[self.counter*4096:self.counter*4096+4096]
+
+        print (self.counter,len(returnData))
+
+        self.counter+=1
+
+        return returnData, pyaudio.paContinue
 
     def start(self):
         self.stream.start_stream()

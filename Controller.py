@@ -5,6 +5,10 @@ from threading import Thread
 from LPSimulator import LP
 from Visualisation import Visualisation
 
+import collections
+
+import sci
+
 import time
 
 
@@ -22,12 +26,14 @@ class Controller(Observer, Thread):
         self.visualisation = Visualisation(self.lp)
 
         self.prevCoordinate=None
-
+        self.timestamp=None
+        self.prevTimestamp=None
 
         self.start()
-        self.visualisation.start()
+        #self.visualisation.start()
 
         self.leapAccess.start()
+
 
 
 
@@ -50,7 +56,6 @@ class Controller(Observer, Thread):
 
         scale=0 if angle == 0  else 1/ (angle /normalDelta)
 
-        print(scale)
 
         #self.scale = abs(self.scale)
         self.lp.addToRotation(angle)
@@ -59,7 +64,7 @@ class Controller(Observer, Thread):
             pass
             #print(x1,y1,x2,y2)
 
-        if abs(scale)>100000.0 or abs(scale)<0.00000001:
+        if abs(scale)>1000.0 or abs(scale)<0.0001:
             scale=0
 
 
@@ -91,9 +96,27 @@ class Controller(Observer, Thread):
         return 0
 
 
-        # increments=len(path)/numberOfVectors
+
+
+        # data=collections.deque(maxlen=numberOfVectors)
         #
-        # data=[]
+        # if not self.prevTimestamp:
+        #     self.prevTimestamp=int(round(time.time() * 1000))
+        #
+        # if len(path)<1:
+        #     return data
+        #
+        #
+        #
+        # increments=0
+        # if len(path)/numberOfVectors<1:
+        #     increments=1
+        # else:
+        #     increments=len(path)/numberOfVectors
+        #
+        #
+        # print(len(path))
+        #
         # for i in range(0,len(path),increments):
         #
         #     if len(data)>=numberOfVectors:
@@ -104,14 +127,17 @@ class Controller(Observer, Thread):
         #     if len(data)==numberOfVectors-1:
         #         nextPos=len(path)-1
         #
+        #
+        #     self.timestamp=int(round(time.time() * 1000))
         #     scale=self.calculateScale(path[i]["x"],path[i]["y"],path[nextPos]["x"],path[nextPos]["y"])
+        #     self.prevTimestamp=self.timestamp
         #
         #     data.append(scale)
         #
         #
-        # self.leapAccess.path.clear()
-        #
-        #
+        # path.clear()
+
+
         # #TODO: Berechnung der Laenge der Ausgabe in Controller; Path irgendwie richtig leeren/Index ...
         #
         # return data
