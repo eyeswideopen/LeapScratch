@@ -115,13 +115,19 @@ class LeapController(Leap.Listener):
 
     def getScale(self):
 
-        normalDistance = 50
-
+        normalDistance = 20
         if not len(self.path) == 0:
             #TODO: failsafe bei init mit tracking. knallt vermutlich
-            if not self.lastCallbackPos:
-                self.lastCallbackPos = self.path.pop()["x"]
 
-            return self.path.pop()["x"] / normalDistance
+            x=self.path.pop()["x"]
+
+            if not self.lastCallbackPos:
+                self.lastCallbackPos = x
+
+            scale=x/ normalDistance
+
+            self.lastCallbackPos=x
+
+            return scale
 
         return 1.0

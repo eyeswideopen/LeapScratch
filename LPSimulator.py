@@ -23,7 +23,6 @@ class LP(Thread):
 
         self.stopped=False
         self.timestamp=time.time()
-        self.start()
 
     def addToRotation(self,angle):
         self.rotation+=angle
