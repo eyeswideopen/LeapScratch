@@ -17,9 +17,10 @@ class Controller( Thread):
         self.leap = LeapController()
 
 
+
         radius = 150
         self.lp = LP(0, 0, radius)
-        self.sampler = AudioController(FileHandler("output/vocal.wav"),self.getScale)
+        self.sampler = AudioController(FileHandler(filePath),self.getScale)
 
         self.visualisation = Visualisation(self.lp)
 
@@ -88,4 +89,4 @@ class Controller( Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("output/vocal.wav")
+    c = Controller("output/file.wav")
