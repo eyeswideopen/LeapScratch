@@ -9,6 +9,7 @@ class NewLeapController(Leap.Listener):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
         self.lastFrame = None
+        self.lastScale = 1.0
 
     def start(self):
         controller = Leap.Controller()
@@ -35,15 +36,22 @@ class NewLeapController(Leap.Listener):
         self.path.append(controller.frame())
 
     def getScale(self):
+        #return 0.5
         frame = self.path.pop() if len(self.path) > 0 else None
         if frame:
             pos = self.getPos(frame)
             translation, translationProb = self.getTranslation(frame)
-            ret = translation.x / 5 if pos and pos.y < 200 else 1.0
+            ret = translation.x / 15 if pos and pos.y < 200 else 1.0
             self.path.clear()
             self.lastFrame = frame
+
+            if abs(ret) - abs(self.lastScale)> 0.1:
+                ret = ret - 0.1 if self.lastScale < ret else ret + 0.001
+            self.lastScale = ret
+            #TODO: wasn das
+            return ret
             print 0.0 if abs(ret) < 0.1 else ret
-            return 0.0 if abs(ret) < 0.1 else ret
+            return 0.0 if abs(ret) < 0.3 else ret
         return 1.0
 
 

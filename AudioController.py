@@ -6,14 +6,15 @@ class AudioController:
         self.file=fileObject
 
         def callback(in_data, frame_count, time_info, status):
-            scale=scaleMethod()
-            return self.file.getAudio(frame_count,scale), pyaudio.paContinue
+            return self.file.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
 
         self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
                                   channels=self.file.getChannels(),
                                   rate=self.file.getFramerate(),
                                   output=True,
                                   stream_callback=callback)
+
+        print self.file.getChannels()
 
     def start(self):
         self.stream.start_stream()
