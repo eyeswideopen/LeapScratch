@@ -3,7 +3,7 @@ import pyaudio
 class AudioController:
     def __init__(self,fileObject,scaleMethod):
         self.p = pyaudio.PyAudio()
-        self.file=fileObject
+        self.file = fileObject
 
         def callback(in_data, frame_count, time_info, status):
             return self.file.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
@@ -12,7 +12,8 @@ class AudioController:
                                   channels=self.file.getChannels(),
                                   rate=self.file.getFramerate(),
                                   output=True,
-                                  stream_callback=callback)
+                                  stream_callback=callback,
+                                  frames_per_buffer=2048)
 
         print self.file.getChannels()
 

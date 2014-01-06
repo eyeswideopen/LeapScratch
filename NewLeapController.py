@@ -38,6 +38,7 @@ class NewLeapController(Leap.Listener):
     def getScale(self):
         #return 0.5
         frame = self.path.pop() if len(self.path) > 0 else None
+
         if frame:
             pos = self.getPos(frame)
             translation, translationProb = self.getTranslation(frame)
@@ -46,12 +47,11 @@ class NewLeapController(Leap.Listener):
             self.lastFrame = frame
 
             if abs(ret) - abs(self.lastScale)> 0.1:
-                ret = ret - 0.1 if self.lastScale < ret else ret + 0.001
+                ret = ret - 0.1 if self\
+                                       .lastScale < ret else ret + 0.001
             self.lastScale = ret
-            #TODO: wasn das
             return ret
-            print 0.0 if abs(ret) < 0.1 else ret
-            return 0.0 if abs(ret) < 0.3 else ret
+
         return 1.0
 
 

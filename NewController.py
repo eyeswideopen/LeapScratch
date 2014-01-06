@@ -13,4 +13,4 @@ class Controller( Thread):
         self.leap.start()
 
 if __name__ == "__main__":
-    c = Controller("output/file.wav")
+    c = Controller("input/scratch.wav")
