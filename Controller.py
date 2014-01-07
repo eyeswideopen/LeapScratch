@@ -15,11 +15,11 @@ class Controller(Thread):
         self.crossfading=False
         self.crossfade=[1,0]
         self.crossfadeRange=100
-        self.crossfadeBorders=(None,None)
+        self.crossfadeBorders=(None, None)
 
         self.scratchMusicSampler = AudioController(ScratchFileHandler(scratchFilePath), volumeFunction=self.getScratchCrossfade, scaleFunction=self.leap.getScale)
 
-        self.baseMusicSampler=AudioController(BaseFileHandler(baseFilePath),volumeFunction=self.getBaseCrossfade)
+        self.baseMusicSampler=AudioController(BaseFileHandler(baseFilePath), volumeFunction=self.getBaseCrossfade)
 
         self.volume=100
 
