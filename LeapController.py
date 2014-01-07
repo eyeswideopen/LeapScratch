@@ -4,11 +4,12 @@ import Leap
 import collections
 
 
-class NewLeapController(Leap.Listener):
+class LeapController(Leap.Listener):
     def __init__(self):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
         self.lastFrame = None
+        self.frame=None
         self.lastScale = 1.0
 
     def start(self):
@@ -33,7 +34,20 @@ class NewLeapController(Leap.Listener):
         return None, None
 
     def on_frame(self, controller):
-        self.path.append(controller.frame())
+        frame=controller.frame()
+        self.path.append(frame)
+        self.frame=frame
+
+
+    def getCrossfadePosition(self):
+        if not self.frame:
+            return
+        hands=self.frame.hands
+
+        if len(hands)>1:
+            hand=hands.leftmost
+            return hand.palm_position.x
+
 
     def getScale(self):
 
@@ -101,5 +115,5 @@ class NewLeapController(Leap.Listener):
 
 
 if __name__ == "__main__":
-    leap = NewLeapController()
+    leap = LeapController()
     leap.start()

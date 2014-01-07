@@ -8,9 +8,46 @@ import numpy
 import struct
 
 
-class NewFileHandler:
+class BaseFileHandler:
+
     def __init__(self, fileName):
         self.wf = wave.open(fileName, 'rb')
+
+    def getAudio(self, frames, scale=1,volumeFactor=1):
+
+
+        data = self.wf.readframes(frames)
+
+
+        #1 short out of each 2 chars in data
+        count = len(data) / 2
+        format = "%dh" % (count) #results in '2048h' as format: 2048 short
+
+        #interleaved int16 data of both channels with #frames samples
+        shorts = struct.unpack(format, data)
+
+        #set Volume
+        audioData=map(lambda x: x*volumeFactor, shorts)
+
+        return struct.pack("%dh" % (len(audioData)), *list(audioData))
+
+    def getChannels(self):
+        return self.wf.getnchannels()
+
+    def getFramerate(self):
+        return self.wf.getframerate()
+
+    def getSampleWidth(self):
+        return self.wf.getsampwidth()
+
+    def close(self):
+        self.wf.close()
+
+
+
+class ScratchFileHandler(BaseFileHandler):
+    def __init__(self, fileName):
+        BaseFileHandler.__init__(self,fileName)
         self.index = 0
         self.scale = 1.0
 
@@ -18,7 +55,8 @@ class NewFileHandler:
         self.leftInterpolationBuffer = [0, 0, 0]
         self.rightInterpolationBuffer = [0, 0, 0]
 
-    def getAudio(self, frames, scale):
+    def getAudio(self, frames,scale=1,volumeFactor=1):
+
 
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
@@ -59,6 +97,10 @@ class NewFileHandler:
         # lowleft = []
         # for i in range(len(rightChannel)):
         #     lowleft.append(leftChannel[i]*0.1)
+
+        #set volume to both channels
+        leftChannel=map(lambda xl: xl*volumeFactor,leftChannel)
+        rightChannel=map(lambda xr: xr*volumeFactor,rightChannel)
 
 
         #resampling
@@ -150,27 +192,12 @@ class NewFileHandler:
                     continue
 
                 if pointer >= len(inData):
-                    print "shit"
                     params.append(1.0)
                     pointer += 1
                     continue
 
                 params.append(inData[pointer])
-                #print numpyData[pointer]
                 pointer += 1
 
             interpolationIndices[i] = waveInterpolator(dist, params)
         return interpolationIndices
-
-
-    def getChannels(self):
-        return self.wf.getnchannels()
-
-    def getFramerate(self):
-        return self.wf.getframerate()
-
-    def getSampleWidth(self):
-        return self.wf.getsampwidth()
-
-    def close(self):
-        self.wf.close()

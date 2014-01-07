@@ -1,13 +1,13 @@
 import pyaudio
 
 class AudioController:
-    def __init__(self,fileObject,scaleMethod):
+    def __init__(self,fileObject,scaleFunction=lambda: 1,volumeFunction=lambda: 1):
         self.p = pyaudio.PyAudio()
         self.file = fileObject
 
 
         def callback(in_data, frame_count, time_info, status):
-            return self.file.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
+            return self.file.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paContinue
 
         self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
                                   channels=self.file.getChannels(),
