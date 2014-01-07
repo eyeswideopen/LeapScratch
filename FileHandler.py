@@ -62,8 +62,8 @@ class ScratchFileHandler(BaseFileHandler):
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
         #thus len(data) has to be 4096 as one char is only 1 byte long
 
-        if abs(scale) < 0.1:
-            return (frames * 4) * "0"
+        # if abs(scale) < 0.1:
+        #     return (frames * 4) * "0"
 
         framesToRead = int(frames * abs(scale))
 
@@ -71,7 +71,11 @@ class ScratchFileHandler(BaseFileHandler):
         if framesToRead % 2 != 0:
             framesToRead += 1
 
-        data = self.readFromFile(framesToRead, True if scale < 0 else False)
+
+        if abs(scale) < 0.1:
+            data = (frames * 4) * "0"
+        else:
+            data = self.readFromFile(framesToRead, True if scale < 0 else False)
 
         #1 short out of each 2 chars in data
         count = len(data) / 2
@@ -104,9 +108,9 @@ class ScratchFileHandler(BaseFileHandler):
 
 
         #resampling
-        if scale != 1.0:
-            leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
-            rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
+        # if scale != 1.0:
+        leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
+        rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
 
         #save last 3 played frames for next interpolation
         self.leftInterpolationBuffer = leftChannel[len(leftChannel) - 3:]

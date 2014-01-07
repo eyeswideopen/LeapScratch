@@ -63,16 +63,17 @@ class LeapController(Leap.Listener):
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        scale = translation.x / 18 if pos and pos.y < 200 else 1.0
+        scale = translation.x / 3 if pos and pos.y < 200 else 1.0
 
         #clears path of used frames
         self.path.clear()
 
         #
-        if abs(abs(scale) - abs(self.lastScale))> 0.1:
-            ret = self.lastScale + 0.1 if self.lastScale < scale else self.lastScale - 0.1
+        threshold = 0.2
+        if abs(abs(scale) - abs(self.lastScale))> threshold:
+            scale = self.lastScale + threshold if self.lastScale < scale else self.lastScale - threshold
 
-        if abs(scale) < 0.005:
+        if abs(scale) < 0.2:
             scale = 0.0
 
         scale = round(scale, 2)
