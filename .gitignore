@@ -9,3 +9,4 @@ Include
 .Python
 output
 .idea
+input/*

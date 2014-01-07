@@ -1,4 +1,5 @@
 import sys, os, math
+
 sys.path.append("lib")
 import Leap
 import collections
@@ -11,15 +12,26 @@ class NewLeapController(Leap.Listener):
         self.lastFrame = None
         self.lastScale = 1.0
 
+        #crossfade and volume variables
+        self.crossfading = False
+        self.crossfade = [.5, .5]
+        self.crossfadeRange = 100
+        self.crossfadeBorders = (None, None)
+        self.volume = 100
+
     def start(self):
         controller = Leap.Controller()
         controller.add_listener(self)
+        print "started"
         sys.stdin.readline()
 
     def stop(self):
         os._exit(0)
 
-    def getPos(self, frame):
+    def on_connect(self, controller):
+        controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE)
+
+    def getScratchPos(self, frame):
         if frame.hands.is_empty:
             return None
         if len(frame.hands.rightmost.fingers) > 0:
@@ -33,9 +45,89 @@ class NewLeapController(Leap.Listener):
         return None, None
 
     def on_frame(self, controller):
-        self.path.append(controller.frame())
+
+        frame = controller.frame()
+        gestures = frame.gestures()
+        self.frame = frame
+
+        if len(gestures)>0:
+            if gestures[0].type == Leap.Gesture.TYPE_CIRCLE:
+                self.gestured = True
+                return
+
+        self.gestured = False
+
+        self.path.append(frame)
+
+
+
+    def getCrossfade(self):
+
+        def calculateDistance(div):
+            div /= 75
+            if abs(div) < 0.01:
+                div = 0
+            self.crossfade[0] += div
+            self.crossfade[1] -= div
+            if self.crossfade[0] > 1: self.crossfade[0] = 1
+            if self.crossfade[0] < 0: self.crossfade[0] = 0
+            if self.crossfade[1] > 1: self.crossfade[1] = 1
+            if self.crossfade[1] < 0: self.crossfade[1] = 0
+            # self.visualisation.setCrossfader(self.crossfade[1])
+            return self.crossfade
+
+        def getVolume():
+
+            if not self.gestured:
+                return self.volume/100
+
+            gesture = self.frame.gestures()[0]
+            circle = Leap.CircleGesture(gesture)
+
+            if circle.pointables[0].direction.angle_to(circle.normal) <= math.pi / 2:
+                self.volume += 0.01
+
+            else:
+                self.volume -= 0.01
+
+            if self.volume > 100:
+                self.volume = 100
+            elif self.volume < 0:
+                self.volume = 0
+            return self.volume/100
+
+
+        if not self.frame or self.gestured:
+            self.lastCrossfadePos = None
+            return self.crossfade
+
+        hands = self.frame.hands
+
+        if len(hands) > 1:
+            hand = hands.leftmost
+
+            if hand.palm_position.y < 200:
+                if not self.lastCrossfadePos:
+                    self.lastCrossfadePos = hand.palm_position.x
+                    return self.crossfade
+
+                x = self.lastCrossfadePos
+                y = hand.palm_position.x
+
+                dis = abs(x - y)
+
+                if x > y:
+                    self.lastCrossfadePos = y
+                    return calculateDistance(dis)
+                self.lastCrossfadePos = y
+                return calculateDistance(-dis)
+
+        self.lastCrossfadePos = None
+
+        return map(lambda x: x * getVolume(), self.crossfade)
 
     def getScale(self):
+
 
         #pop next frame if available, else returns old scale
         frame = self.path.pop() if len(self.path) > 0 else None
@@ -43,20 +135,20 @@ class NewLeapController(Leap.Listener):
             return self.lastScale
 
         #gets the tracked position
-        pos = self.getPos(frame)
+        pos = self.getScratchPos(frame)
 
         #estimates if translation is present since last frame
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        scale = translation.x / 3 if pos and pos.y < 200 else 1.0
+        scale = translation.x / 30 if pos and pos.y < 200 else 1.0
 
         #clears path of used frames
         self.path.clear()
 
         #
         threshold = 0.2
-        if abs(abs(scale) - abs(self.lastScale))> threshold:
+        if abs(abs(scale) - abs(self.lastScale)) > threshold:
             scale = self.lastScale + threshold if self.lastScale < scale else self.lastScale - threshold
 
         if abs(scale) < 0.2:
@@ -67,38 +159,6 @@ class NewLeapController(Leap.Listener):
         self.lastScale = scale
 
         return scale
-
-
-        #return 0.5
-
-        # frame = self.path.pop() if len(self.path) > 0 else None
-        # if not frame:
-        #     return self.lastScale
-        #
-        # if frame:
-        #     pos = self.getPos(frame)
-        #     translation, translationProb = self.getTranslation(frame)
-        #
-        #     ret = translation.x / 50 if pos and pos.y < 200 else self.lastScale
-        #
-        #     self.path.clear()
-        #
-        #     self.lastFrame = frame
-        #
-        #     if abs(abs(ret) - abs(self.lastScale))> 0.1:
-        #         ret = self.lastScale + 0.1 if self.lastScale < ret else self.lastScale - 0.1
-        #
-        #     if abs(ret) < 0.005:
-        #         ret = 0.0
-        #
-        #     ret = round(ret, 2)
-        #
-        #     self.lastScale = ret
-        #
-        #     return ret
-        #
-        #     # return 0.0 if abs(ret) < 0.3 else ret
-        # return 1.0
 
 
 if __name__ == "__main__":

@@ -4,13 +4,14 @@ import numpy
 
 
 class AudioController:
-    def __init__(self, fileObject, scaleMethod):
+    def __init__(self, baseFile, scratchingFile, scaleFunction=lambda: 1, volumeFunction=lambda: 1):
 
         #
         #pyaudio variables
         #
         self.p = pyaudio.PyAudio()
-        self.file = fileObject
+        self.baseFile = baseFile
+        self.scratchingFile = scratchingFile
 
         #
         #audio manipulation variables
@@ -20,16 +21,15 @@ class AudioController:
 
 
         def callback(in_data, frame_count, time_info, status):
-            return self.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
+            return self.getAudio(frame_count, scaleFunction(), volumeFunction()), pyaudio.paContinue
 
-        self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
-                                  channels=self.file.getChannels(),
-                                  rate=self.file.getFramerate(),
+        self.stream = self.p.open(format=self.p.get_format_from_width(self.baseFile.getSampleWidth()),
+                                  channels=self.baseFile.getChannels(),
+                                  rate=self.baseFile.getFramerate(),
                                   output=True,
                                   stream_callback=callback,
-                                  frames_per_buffer=1024)
-
-        print self.file.getChannels()
+                                  frames_per_buffer=4096
+        )
 
     def start(self):
         self.stream.start_stream()
@@ -41,9 +41,10 @@ class AudioController:
         self.p.terminate()
 
 
-    def getAudio(self, frames, scale):
+    def getAudio(self, frames, scale, volume):
 
-        scale = 1.5
+        # scale = 1.5
+
 
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
@@ -52,16 +53,23 @@ class AudioController:
         # if abs(scale) < 0.1:
         #     return (frames * 4) * "0"
 
-        framesToRead = int(frames * abs(scale))
+        baseVolume, scratchingVolume = volume
 
-        #prevent messing up channel order
-        if framesToRead % 2 != 0:
-            framesToRead += 1
+
+        #base file data modulation
+        baseFileData = self.baseFile.getFileData(frames, False)
+        count = len(baseFileData) / 2
+        format = "%dh" % (count) #results in '2048h' as format: 2048 short
+        baseFileData = struct.unpack(format, baseFileData)
+        baseFileData = map(lambda x: x * baseVolume, baseFileData)
+
+
+        framesToRead = int(frames * abs(scale))
 
         if abs(scale) < 0.1:
             data = (frames * 4) * "0"
         else:
-            data = self.file.getFileData(framesToRead, True if scale < 0 else False)
+            data = self.scratchingFile.getFileData(framesToRead, True if scale < 0 else False)
 
         #1 short out of each 2 chars in data
         count = len(data) / 2
@@ -90,19 +98,30 @@ class AudioController:
 
 
         #resampling
-        # if scale != 1.0:
-        leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
-        rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
+        if scale != 1.0:
+            leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
+            rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
+
+        #adjust volume to value provided by volumeFunction
+        leftChannel = map(lambda xl: xl * scratchingVolume, leftChannel)
+        rightChannel = map(lambda xr: xr * scratchingVolume, rightChannel)
 
         #save last 3 played frames for next interpolation
         self.leftInterpolationBuffer = leftChannel[len(leftChannel) - 3:]
         self.rightInterpolationBuffer = rightChannel[len(leftChannel) - 3:]
 
 
-        #interleave channels back together!
-        interleaved = numpy.vstack((leftChannel, rightChannel)).reshape((-1,), order='F')
 
-        return struct.pack("%dh" % (len(interleaved)), *list(interleaved))
+        #interleave channels back together!
+        interleavedScratchData = numpy.vstack((leftChannel, rightChannel)).reshape((-1,), order='F')
+
+
+
+        for i in range(len(interleavedScratchData)):
+            interleavedScratchData[i] += baseFileData[i]
+
+
+        return struct.pack("%dh" % (len(interleavedScratchData)), *list(interleavedScratchData))
 
 
     def resample(self, inData, length, interpolationBufferTail):
