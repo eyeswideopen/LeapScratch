@@ -6,7 +6,7 @@ import wave
 import audioop
 
 
-class NewFileHandler:
+class FileHandler:
     def __init__(self, fileName):
         self.wf = wave.open(fileName, 'rb')
         self.index = 0
@@ -18,7 +18,7 @@ class NewFileHandler:
         print len(self.fileData)
 
 
-    def getFileData(self, frames, reverse):
+    def getFileData(self, frames, reverse=False):
 
         #frames is number of frames per channel in int 16
         #so return frames * 2 * 2 string chars from file string
