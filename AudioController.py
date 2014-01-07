@@ -43,7 +43,7 @@ class AudioController:
 
     def getAudio(self, frames, scale, volume):
 
-        # scale = 1.5
+        scale = 1.5
 
 
         #frames is the requested amount of int16 sample per channel
