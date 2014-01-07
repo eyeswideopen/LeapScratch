@@ -108,9 +108,9 @@ class ScratchFileHandler(BaseFileHandler):
 
 
         #resampling
-        # if scale != 1.0:
-        leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
-        rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
+        if scale != 1.0:
+            leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
+            rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
 
         #save last 3 played frames for next interpolation
         self.leftInterpolationBuffer = leftChannel[len(leftChannel) - 3:]

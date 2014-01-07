@@ -9,6 +9,7 @@ class Visualisation():
         self.pointing=False
         self.spriteCursor=None
         self.spriteCrossfader=None
+        self.spriteSlider=None
         self.width=600
         self.height=480
 
@@ -34,14 +35,18 @@ class Visualisation():
 
             spriteLp=pyglet.sprite.Sprite(picLp,width/2,height/2)
 
-            scale=self.lp.radius*2/picLp.width
+            scale=self.lp.radius*2/float(picLp.width)
             spriteLp.scale=scale
 
 
             picSlider = pyglet.image.load('resources/slider.png')
-            spriteSlider=pyglet.sprite.Sprite(picSlider)
+            self.spriteSlider=pyglet.sprite.Sprite(picSlider)
+            scale=width/float(self.spriteSlider.width)
+            print scale
+            self.spriteSlider.scale=scale
 
             picCrossfader=pyglet.image.load('resources/pointer.png')
+            picCrossfader.anchor_x = picCrossfader.width /2
             self.spriteCrossfader=pyglet.sprite.Sprite(picCrossfader)
 
 
@@ -52,14 +57,12 @@ class Visualisation():
             w.on_close=close
 
 
-
-
             def draw(e):
                 w.clear()
                 spriteLp.rotation=self.lp.rotation
                 spriteLp.draw()
 
-                spriteSlider.draw()
+                self.spriteSlider.draw()
                 self.spriteCrossfader.draw()
 
 
@@ -80,9 +83,10 @@ class Visualisation():
             self.spriteCursor.x=x+self.width/2
             self.spriteCursor.y=-y+self.height/2
 
-    def setCrossfader(self,x):
+    def setCrossfader(self,factor):
         if self.spriteCrossfader:
-            self.spriteCrossfader.x=x
+
+            self.spriteCrossfader.x=self.spriteSlider.width*factor
 
 if __name__=="__main__":
     from LPSimulator import LP
