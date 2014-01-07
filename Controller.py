@@ -1,7 +1,7 @@
 from __future__ import division
 from threading import Thread
-from AudioController import AudioController
-from FileHandler import ScratchFileHandler,BaseFileHandler
+from AudioController import BaseAudioController,ScratchAudioController
+from FileHandler import FileHandler
 from LPSimulator import LP
 from LeapController import LeapController
 from Visualisation import Visualisation
@@ -13,23 +13,25 @@ class Controller(Thread):
         self.leap = LeapController()
 
         self.crossfading=False
-        self.crossfade=[1,0]
+        self.crossfade=[0,1]
         self.crossfadeRange=100
         self.crossfadeBorders=(None, None)
 
-        self.scratchMusicSampler = AudioController(ScratchFileHandler(scratchFilePath), volumeFunction=self.getScratchCrossfade, scaleFunction=self.leap.getScale)
-
-        self.baseMusicSampler=AudioController(BaseFileHandler(baseFilePath), volumeFunction=self.getBaseCrossfade)
 
         self.volume=100
 
         radius = 150
         self.lp = LP(0, 0, radius)
 
+
+        self.scratchMusicSampler = ScratchAudioController(FileHandler(scratchFilePath), volumeFunction=self.getScratchCrossfade, scaleFunction=self.leap.getScale)
+
+        self.baseMusicSampler=BaseAudioController(FileHandler(baseFilePath), volumeFunction=self.getBaseCrossfade)
+
         self.visualisation=Visualisation(self.lp)
 
         self.lp.start()
-        self.visualisation.start()
+        #self.visualisation.start()
         self.start()
 
 
@@ -68,6 +70,8 @@ class Controller(Thread):
                 self.volume=100
             elif self.volume<0:
                 self.volume=0
+
+            print self.volume
 
     def getCrossfade(self):
         return self.crossfade

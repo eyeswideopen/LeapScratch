@@ -3,33 +3,25 @@ import struct
 import numpy
 
 
-class AudioController:
-    def __init__(self, fileObject, scaleMethod):
-
+class BaseAudioController:
+    def __init__(self, fileObject, volumeFunction=lambda: 1, createStream=True):
         #
         #pyaudio variables
         #
         self.p = pyaudio.PyAudio()
         self.file = fileObject
 
-        #
-        #audio manipulation variables
-        #
-        self.leftInterpolationBuffer = [0, 0, 0]
-        self.rightInterpolationBuffer = [0, 0, 0]
+        if createStream:
+            def callback(in_data, frame_count, time_info, status):
+                return self.getAudio(frame_count, volume=volumeFunction()), pyaudio.paContinue
 
+            self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
+                                      channels=self.file.getChannels(),
+                                      rate=self.file.getFramerate(),
+                                      output=True,
+                                      stream_callback=callback,
+                                      frames_per_buffer=1024)
 
-        def callback(in_data, frame_count, time_info, status):
-            return self.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
-
-        self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
-                                  channels=self.file.getChannels(),
-                                  rate=self.file.getFramerate(),
-                                  output=True,
-                                  stream_callback=callback,
-                                  frames_per_buffer=1024)
-
-        print self.file.getChannels()
 
     def start(self):
         self.stream.start_stream()
@@ -41,9 +33,51 @@ class AudioController:
         self.p.terminate()
 
 
-    def getAudio(self, frames, scale):
+    def getAudio(self, frames, scale=1, volume=1):
+        #frames is the requested amount of int16 sample per channel
+        #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
+        #thus len(data) has to be 4096 as one char is only 1 byte long
 
-        scale = 1.5
+        # if abs(scale) < 0.1:
+        #     return (frames * 4) * "0"
+
+        framesToRead = frames
+
+        data = self.file.getFileData(framesToRead)
+
+        #1 short out of each 2 chars in data
+        count = len(data) / 2
+        format = "%dh" % (count) #results in '2048h' as format: 2048 short
+
+        #interleaved int16 data of both channels with #frames samples
+        shorts = struct.unpack(format, data)
+
+        audioData = map(lambda x: x * volume, shorts)
+
+        return struct.pack("%dh" % (len(audioData)), *list(audioData))
+
+
+class ScratchAudioController(BaseAudioController):
+    def __init__(self, fileObject, volumeFunction=lambda: 1, scaleFunction=lambda: 1):
+
+        BaseAudioController.__init__(self, fileObject, createStream=False)
+
+        #
+        #audio manipulation variables
+        #
+        self.leftInterpolationBuffer = [0, 0, 0]
+        self.rightInterpolationBuffer = [0, 0, 0]
+
+
+        def callback(in_data, frame_count, time_info, status):
+            return self.getAudio(frame_count, volume=volumeFunction(), scale=scaleFunction()), pyaudio.paContinue
+
+        self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
+                                  channels=self.file.getChannels(), rate=self.file.getFramerate(), output=True,
+                                  stream_callback=callback, frames_per_buffer=1024)
+
+
+    def getAudio(self, frames, volume=1, scale=1):
 
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
@@ -83,16 +117,14 @@ class AudioController:
         # MODIFICATION AFTER DEINTERLEAVING FOR INDEPENDANT CHANNEL ALTERATION
         #
 
-        #test channel dependant volume modification
-        # lowleft = []
-        # for i in range(len(rightChannel)):
-        #     lowleft.append(leftChannel[i]*0.1)
 
 
-        #resampling
-        # if scale != 1.0:
+
         leftChannel = self.resample(leftChannel, frames, self.leftInterpolationBuffer)
         rightChannel = self.resample(rightChannel, frames, self.rightInterpolationBuffer)
+
+        leftChannel=map(lambda xl: xl*volume,leftChannel)
+        rightChannel=map(lambda xr: xr*volume,rightChannel)
 
         #save last 3 played frames for next interpolation
         self.leftInterpolationBuffer = leftChannel[len(leftChannel) - 3:]
@@ -169,6 +201,3 @@ class AudioController:
         return interpolationIndices
 
 
-if __name__ == "__main__":
-    lp = AudioController()
-    lp.play()

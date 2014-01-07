@@ -70,10 +70,10 @@ class LeapController(Leap.Listener):
         circle=Leap.CircleGesture(gesture)
 
         if circle.pointables[0].direction.angle_to(circle.normal) <= math.pi/2:
-            return 0.05
+            return 0.01
 
         else:
-            return -0.05
+            return -0.01
 
 
     def getCrossfade(self):
