@@ -5,7 +5,7 @@ import Leap
 import collections
 
 
-class NewLeapController(Leap.Listener):
+class LeapController(Leap.Listener):
     def __init__(self):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
@@ -13,6 +13,7 @@ class NewLeapController(Leap.Listener):
 
         self.frame=None
         self.lastScale = 1.0
+        self.frame = None
 
         #crossfade and volume variables
         self.crossfading = False
@@ -170,5 +171,5 @@ class NewLeapController(Leap.Listener):
 
 
 if __name__ == "__main__":
-    leap = NewLeapController()
+    leap = LeapController()
     leap.start()
