@@ -10,11 +10,13 @@ class NewLeapController(Leap.Listener):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
         self.lastFrame = None
+
+        self.frame=None
         self.lastScale = 1.0
 
         #crossfade and volume variables
         self.crossfading = False
-        self.crossfade = [.5, .5]
+        self.crossfade = [0.5,0.5]
         self.crossfadeRange = 100
         self.crossfadeBorders = (None, None)
         self.volume = 100
@@ -124,7 +126,13 @@ class NewLeapController(Leap.Listener):
 
         self.lastCrossfadePos = None
 
-        return map(lambda x: x * getVolume(), self.crossfade)
+        self.crossfade= map(lambda x: x * getVolume(), self.crossfade)
+
+    def getScratchCrossfade(self):
+        return self.crossfade[1]
+
+    def getBaseCrossfade(self):
+        return self.crossfade[0]
 
     def getScale(self):
 
