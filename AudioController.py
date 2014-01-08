@@ -1,10 +1,11 @@
 import pyaudio
 import struct
 import numpy
+import operator
 
 
 class AudioController:
-    def __init__(self, baseFile, scratchingFile, scaleFunction=lambda: 1, volumeFunction=lambda: 1):
+    def __init__(self, baseFile, scratchingFile, scaleFunction=lambda: 1, volumeFunction=lambda: [.5, .5]):
 
         #
         #pyaudio variables
@@ -28,8 +29,7 @@ class AudioController:
                                   rate=self.baseFile.getFramerate(),
                                   output=True,
                                   stream_callback=callback,
-                                  frames_per_buffer=4096
-        )
+                                  frames_per_buffer=1024)
 
     def start(self):
         self.stream.start_stream()
@@ -43,7 +43,7 @@ class AudioController:
 
     def getAudio(self, frames, scale, volume):
 
-        scale = 1.5
+        # scale = 1.5
 
 
         #frames is the requested amount of int16 sample per channel
