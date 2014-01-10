@@ -4,21 +4,21 @@ import numpy
 
 
 class AudioController:
-    def __init__(self, fileObject, scaleMethod):
+    def __init__(self, fileObject, scaleFunction=lambda:1,volumeFunction=lambda:1):
 
         self.p = pyaudio.PyAudio()
         self.file = fileObject
         self.interpolationBufferTail = [0, 0, 0, 0, 0, 0]
 
         def callback(in_data, frame_count, time_info, status):
-            return self.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
+            return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paContinue
 
         self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
                                   channels=self.file.getChannels(),
                                   rate=self.file.getFramerate(),
                                   output=True,
                                   stream_callback=callback,
-                                  frames_per_buffer=128)
+                                  frames_per_buffer=512)
 
     def start(self):
         self.stream.start_stream()
@@ -30,7 +30,8 @@ class AudioController:
         self.p.terminate()
 
 
-    def getAudio(self, frames, scale):
+    def getAudio(self, frames, scale,volume):
+
 
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
@@ -48,15 +49,20 @@ class AudioController:
         data = tuple(self.interpolationBufferTail) + data
 
         #resample
-        data = self.resample(data, frames * 2)
+        if scale!=1:
+            data = self.resample(data, frames * 2)
+
 
         #save tail for next interpolation
         self.interpolationBufferTail = data[len(data) - 6:]
+
+        data=map(lambda x: x*volume,data)
 
         return struct.pack("%dh" % (len(data)), *list(data))
 
 
     def resample(self, inData, length):
+
 
         ##6-point, 5th-order optimal 32x z-form interpolator
         ##params:
@@ -108,4 +114,9 @@ class AudioController:
             params.append(inData[pointer + 6])
 
             outData.append(waveInterpolator(dist, params))
+
+
+
+
+
         return outData

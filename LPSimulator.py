@@ -8,7 +8,7 @@ import time
 
 class LP(Thread):
 
-    def __init__(self,x,y,radius):
+    def __init__(self,updateFunction=lambda x: x,radius=150,x=0,y=0,):
         Thread.__init__(self)
 
         self.x=x
@@ -16,8 +16,14 @@ class LP(Thread):
         self.radius=radius
         self.revolution=45
 
+        self.updateRotation=updateFunction
+
         self.rotation=0
         self.running=True
+        self.scratching=False
+
+        self.pos=None
+        self.lastPos=None
 
         self.degreesPerMillisecond=(360*(self.revolution/60))/1000 #delta for every millisecond depending on revolutions per minute
 
@@ -27,6 +33,13 @@ class LP(Thread):
     def addToRotation(self,angle):
         self.rotation+=angle
 
+    def setPosition(self,pos):
+        self.lastPos=self.pos
+        self.pos=pos
+        if self.pos and self.lastPos:
+            self.scratching=True
+            self.addToRotation(self.getAngle(pos.x,pos.z,self.lastPos.x,self.lastPos.z))
+
     def run(self):
 
         while self.running:
@@ -34,7 +47,9 @@ class LP(Thread):
                 continue
             # if self.rotation>=360:
             #     self.rotation=0
-            self.rotation+=self.degreesPerMillisecond
+            if not self.scratching:
+                self.rotation+=self.degreesPerMillisecond
+            self.updateRotation(self.rotation)
             time.sleep(0.001)
 
     def stop(self):
@@ -44,9 +59,14 @@ class LP(Thread):
 
 
     def getAngle(self,_x,_y,px,py):
-        alpha1 =math.atan((_x-self.x) / (_y-self.y))
-        alpha2 =math.atan((px-self.x) / (py-self.y))
+
+        if _y-self.y==0 or py-self.y==0:
+            return 0
+        alpha1 =math.atan((_x-self.x) / (-abs(_y)-self.y))
+        alpha2 =math.atan((px-self.x) / (-abs(py)-self.y))
         alpha = alpha2 - alpha1
+        if _y>0:
+            alpha*=-1
 
         return math.degrees(alpha)
 
