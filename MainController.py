@@ -1,12 +1,12 @@
 from threading import Thread
 from LPSimulator import LP
 from Visualisation import Visualisation
-from fastLeapController import LeapController
+from LeapController import LeapController
 from fastAudioController import AudioController
 from FileHandler import FileHandler
 
-from samysFastAudioController import AudioController
-from samysFileHandler import FileHandler
+# from samysFastAudioController import AudioController
+# from samysFileHandler import FileHandler
 
 class Controller(Thread):
     def __init__(self, baseFilePath, scratchFilePath,gui=True):
@@ -23,8 +23,8 @@ class Controller(Thread):
 
         self.lp.start()
 
-        AudioController(FileHandler(scratchFilePath),scaleFunction=self.leap.getScale,volumeFunction=self.leap.getScratchCrossfade)
-        AudioController(FileHandler(baseFilePath),volumeFunction=self.leap.getBaseCrossfade)
+        AudioController(scratchFilePath,scaleFunction=self.leap.getScale,volumeFunction=self.leap.getScratchCrossfade)
+        AudioController(baseFilePath,volumeFunction=self.leap.getBaseCrossfade)
         self.leap.start()
 
     def rotateGui(self,rot):

@@ -1,31 +1,25 @@
+from __future__ import division
 import sys, os, math
-
 sys.path.append("lib")
 import Leap
 import collections
 
 
 class LeapController(Leap.Listener):
-    def __init__(self):
+    def __init__(self,notifyFunction):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
         self.lastFrame = None
-
         self.frame=None
         self.lastScale = 1.0
-        self.frame = None
-
-        #crossfade and volume variables
-        self.crossfading = False
-        self.crossfade = [0.5,0.5]
-        self.crossfadeRange = 100
-        self.crossfadeBorders = (None, None)
-        self.volume = 100
+        self.crossfade=[0,1]
+        self.volume=100
+        self.gestured=False
+        self.notifyFunction=notifyFunction
 
     def start(self):
         controller = Leap.Controller()
         controller.add_listener(self)
-        print "started"
         sys.stdin.readline()
 
     def stop(self):
@@ -34,7 +28,7 @@ class LeapController(Leap.Listener):
     def on_connect(self, controller):
         controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE)
 
-    def getScratchPos(self, frame):
+    def getPos(self, frame):
         if frame.hands.is_empty:
             return None
         if len(frame.hands.rightmost.fingers) > 0:
@@ -49,6 +43,8 @@ class LeapController(Leap.Listener):
 
     def on_frame(self, controller):
 
+        self.calculateCrossfade()
+
         frame = controller.frame()
         gestures = frame.gestures()
         self.frame = frame
@@ -59,12 +55,9 @@ class LeapController(Leap.Listener):
                 return
 
         self.gestured = False
-
         self.path.append(frame)
 
-
-
-    def getCrossfade(self):
+    def calculateCrossfade(self):
 
         def calculateDistance(div):
             div /= 75
@@ -79,7 +72,7 @@ class LeapController(Leap.Listener):
             # self.visualisation.setCrossfader(self.crossfade[1])
             return self.crossfade
 
-        def getVolume():
+        def calculateVolume():
 
             if not self.gestured:
                 return self.volume/100
@@ -88,28 +81,29 @@ class LeapController(Leap.Listener):
             circle = Leap.CircleGesture(gesture)
 
             if circle.pointables[0].direction.angle_to(circle.normal) <= math.pi / 2:
-                self.volume += 0.01
+                self.volume += 1
 
             else:
-                self.volume -= 0.01
+                self.volume -= 1
 
             if self.volume > 100:
                 self.volume = 100
             elif self.volume < 0:
                 self.volume = 0
-            return self.volume/100
+
 
 
         if not self.frame or self.gestured:
             self.lastCrossfadePos = None
-            return self.crossfade
+            calculateVolume()
+            return
 
         hands = self.frame.hands
 
-        if len(hands) > 1:
+        if len(hands) > 0:
             hand = hands.leftmost
 
-            if hand.palm_position.y < 200:
+            if hand.palm_position.y < 200 and hand.palm_position.x<0:
                 if not self.lastCrossfadePos:
                     self.lastCrossfadePos = hand.palm_position.x
                     return self.crossfade
@@ -127,48 +121,57 @@ class LeapController(Leap.Listener):
 
         self.lastCrossfadePos = None
 
-        self.crossfade= map(lambda x: x * getVolume(), self.crossfade)
 
     def getScratchCrossfade(self):
-        return self.crossfade[1]
+        return self.crossfade[1]*self.volume/100
 
     def getBaseCrossfade(self):
-        return self.crossfade[0]
+        return self.crossfade[0]*self.volume/100
+
 
     def getScale(self):
 
-
         #pop next frame if available, else returns old scale
         frame = self.path.pop() if len(self.path) > 0 else None
-        if not frame:
+
+        if self.gestured:
+            self.notifyFunction(False,False,volume=self.volume,crossfade=self.crossfade)
+            return 1
+        elif not frame:
             return self.lastScale
 
-        #gets the tracked position
-        pos = self.getScratchPos(frame)
-
-        #estimates if translation is present since last frame
+        pos = self.getPos(frame)
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        scale = translation.x / 30 if pos and pos.y < 200 else 1.0
 
-        #clears path of used frames
+        breaking=False
+        if pos and pos.y < 100 and pos.x>0:
+            scale=translation.z / 3
+        elif pos and pos.y<200 and pos.x>0:
+            scale=(pos.y-100)/100
+            breaking=True
+        else:
+            scale= 1
+
         self.path.clear()
 
-        #
         threshold = 0.2
-        if abs(abs(scale) - abs(self.lastScale)) > threshold:
+        if abs(abs(scale) - abs(self.lastScale))> threshold:
             scale = self.lastScale + threshold if self.lastScale < scale else self.lastScale - threshold
 
-        if abs(scale) < 0.2:
-            scale = 0.0
+
 
         scale = round(scale, 2)
-
         self.lastScale = scale
+
+        p=frame.hands.rightmost.palm_position
+
+        self.notifyFunction(breaking, True if scale!=1 and not breaking else False,p,self.crossfade,self.volume,scale)
 
         return scale
 
+        #TODO: wenn crossfade an, dann kein scratchen bei >0, plattenposition anpassen (lp,gui,leap)
 
 if __name__ == "__main__":
     leap = LeapController()

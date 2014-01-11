@@ -5,7 +5,7 @@ import wave
 
 
 class AudioController:
-    def __init__(self, fileName, scaleMethod):
+    def __init__(self, fileName, scaleFunction=lambda:1,volumeFunction=lambda: 1):
 
         self.p = pyaudio.PyAudio()
         # self.interpolationBufferTail = [0, 0, 0, 0, 0, 0]
@@ -36,7 +36,7 @@ class AudioController:
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
         def callback(in_data, frame_count, time_info, status):
-            return self.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
+            return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paContinue
 
 
         self.stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
@@ -52,7 +52,7 @@ class AudioController:
         self.p.terminate()
 
 
-    def getAudio(self, frames, scale):
+    def getAudio(self, frames, scale,volume):
 
         # scale = 0.5
 
@@ -66,6 +66,7 @@ class AudioController:
         if abs(scale) < 0.01:
             return (frames * 4) * "0"
 
+        #TODO VOLUME!!!!
 
         if scale != 1.0:
 
