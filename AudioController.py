@@ -5,7 +5,7 @@ import wave
 
 
 class AudioController:
-    def __init__(self, fileName, scaleFunction=lambda:1,volumeFunction=lambda: 1):
+    def __init__(self, fileName, scaleFunction=lambda:1,volumeFunction=lambda: 1,stoppingFunction=lambda: 1):
 
         self.p = pyaudio.PyAudio()
         
@@ -18,12 +18,12 @@ class AudioController:
         self.wf = wave.open(fileName, 'rb')
         print "loading file ..."
         print fileName
-        self.fileData = self.wf.readframes(self.wf.getnframes())
+        self.fileStringData = self.wf.readframes(self.wf.getnframes())
         self.wf.close()
 
         #format: 1 short out of each 2 chars in fileData
         #interleaved int16 data of both channels with #frames samples
-        self.fileData = struct.unpack("%dh" % (len(self.fileData) / 2), self.fileData)
+        self.fileData = struct.unpack("%dh" % (len(self.fileStringData) / 2), self.fileStringData)
         print "... file read to memory and converted to int16!"
 
 
@@ -35,6 +35,11 @@ class AudioController:
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
         def callback(in_data, frame_count, time_info, status):
+
+            if self.index+self.frameSize*2>=self.wf.getnframes()*2:
+                stoppingFunction()
+                return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paAbort
+
             return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paContinue
 
 
@@ -46,7 +51,6 @@ class AudioController:
                                   frames_per_buffer=self.frameSize)
 
     def stop(self):
-        self.stream.stop_stream()
         self.stream.close()
         self.p.terminate()
 
