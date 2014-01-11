@@ -30,7 +30,7 @@ class AudioController:
         #
         # audio setup
         #
-        self.frameSize = 256
+        self.frameSize = 128
         print "starting audio playback with %i channels, %iHz framerate and %i framesize!" \
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
@@ -62,7 +62,7 @@ class AudioController:
         framesToRead = int(frames * abs(scale))
 
         #to low scale => silence
-        if abs(scale) < 0.01:
+        if abs(scale) < 0.2:
             return (frames * 4) * "0"
 
         #TODO VOLUME!!!!

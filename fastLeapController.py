@@ -62,7 +62,6 @@ class fastLeapController(Leap.Listener):
         scale = round(scale, 2)
 
         self.lastScale = scale
-
         return scale
 
 if __name__ == "__main__":

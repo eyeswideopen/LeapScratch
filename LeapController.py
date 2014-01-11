@@ -159,7 +159,7 @@ class LeapController(Leap.Listener):
 
         breaking=False
         if pos and pos.y < 100 and pos.x>0:
-            scale=translation.z / 3
+            scale=translation.x / 3
         elif pos and pos.y<200 and pos.x>0:
             scale=(pos.y-100)/100
             breaking=True

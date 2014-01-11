@@ -30,13 +30,14 @@ class AudioController:
         #
         # audio setup
         #
-        self.frameSize = 256
+        self.frameSize = 128
         print "starting audio playback with %i channels, %iHz framerate and %i framesize!" \
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
         def callback(in_data, frame_count, time_info, status):
 
             if self.index+self.frameSize*2>=self.wf.getnframes()*2:
+                print("fail")
                 stoppingFunction()
                 return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paAbort
 
@@ -56,6 +57,7 @@ class AudioController:
 
 
     def getAudio(self, frames, scale,volume):
+        print scale
 
         # scale = 0.5
 
@@ -66,7 +68,7 @@ class AudioController:
         framesToRead = int(frames * abs(scale))
 
         #to low scale => silence
-        if abs(scale) < 0.01:
+        if abs(scale) < 0.2:
             return (frames * 4) * "0"
 
         if scale != 1.0:

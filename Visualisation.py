@@ -2,19 +2,20 @@ from threading import Thread
 
 import os
 
+
 class Visualisation():
-    def __init__(self,radius):
-        self.radius=radius
-        self.dir=0
-        self.pointing=False
-        self.spriteCursor=None
-        self.spriteSliderCrossfade=None
-        self.spriteSliderVolume=None
-        self.width=1024
-        self.height=640
-        self.rotation=0
-        self.crossfadeRange=(-90,90)
-        self.volumeRange=(-120,120)
+    def __init__(self, radius):
+        self.radius = radius
+        self.dir = 0
+        self.pointing = False
+        self.spriteCursor = None
+        self.spriteSliderCrossfade = None
+        self.spriteSliderVolume = None
+        self.width = 1024
+        self.height = 640
+        self.rotation = 0
+        self.crossfadeRange = (-90, 90)
+        self.volumeRange = (-120, 120)
 
 
     def start(self):
@@ -22,53 +23,52 @@ class Visualisation():
             import pyglet
 
 
-            width=self.width
-            height=self.height
+            width = self.width
+            height = self.height
 
-            w=pyglet.window.Window(width,height)
+            w = pyglet.window.Window(width, height)
 
             picBackground = pyglet.image.load('resources/background.png')
-            spriteBackground=pyglet.sprite.Sprite(picBackground)
-            scale=width/float(spriteBackground.width)
-            spriteBackground.scale=scale
-            
+            spriteBackground = pyglet.sprite.Sprite(picBackground)
+            scale = width / float(spriteBackground.width)
+            spriteBackground.scale = scale
+
             picForeground = pyglet.image.load('resources/topLayer.png')
-            spriteForeground=pyglet.sprite.Sprite(picForeground)
-            scale=width/float(spriteForeground.width)
-            spriteForeground.scale=scale
+            spriteForeground = pyglet.sprite.Sprite(picForeground)
+            scale = width / float(spriteForeground.width)
+            spriteForeground.scale = scale
 
             picHand = pyglet.image.load('resources/hand.png')
             picHand.anchor_y = picHand.height
-            self.spriteCursor=pyglet.sprite.Sprite(picHand)
+            self.spriteCursor = pyglet.sprite.Sprite(picHand)
 
             picLp = pyglet.image.load('resources/platte.png')
-            picLp.anchor_x = picLp.width /2
+            picLp.anchor_x = picLp.width / 2
             picLp.anchor_y = picLp.height / 2
 
-            spriteLp=pyglet.sprite.Sprite(picLp,width/2+32,height/2)
+            spriteLp = pyglet.sprite.Sprite(picLp, width / 2 + 32, height / 2)
 
-            scale=0.355
-            spriteLp.scale=scale
-
+            scale = 0.355
+            spriteLp.scale = scale
 
             picSliderCrossfade = pyglet.image.load('resources/slider_crossfade.png')
-            self.spriteSliderCrossfade=pyglet.sprite.Sprite(picSliderCrossfade)
-            scale=width/float(self.spriteSliderCrossfade.width)
-            self.spriteSliderCrossfade.scale=scale
+            self.spriteSliderCrossfade = pyglet.sprite.Sprite(picSliderCrossfade)
+            scale = width / float(self.spriteSliderCrossfade.width)
+            self.spriteSliderCrossfade.scale = scale
 
             picSliderVolume = pyglet.image.load('resources/slider_masterVolume.png')
-            self.spriteSliderVolume=pyglet.sprite.Sprite(picSliderVolume)
-            scale=width/float(self.spriteSliderVolume.width)
-            self.spriteSliderVolume.scale=scale
+            self.spriteSliderVolume = pyglet.sprite.Sprite(picSliderVolume)
+            scale = width / float(self.spriteSliderVolume.width)
+            self.spriteSliderVolume.scale = scale
 
 
             def close():
                 os._exit(0)
 
-            w.on_close=close
+            w.on_close = close
 
-            def draw_rect(x, y, width, height,filled=True):
-                param=pyglet.gl.GL_QUADS if filled else pyglet.gl.GL_LINE_LOOP
+            def draw_rect(x, y, width, height, filled=True):
+                param = pyglet.gl.GL_QUADS if filled else pyglet.gl.GL_LINE_LOOP
                 pyglet.gl.glBegin(param)
                 pyglet.gl.glVertex2f(x, y)
                 pyglet.gl.glVertex2f(x, y + height)
@@ -82,19 +82,16 @@ class Visualisation():
 
                 spriteBackground.draw()
 
-                spriteLp.rotation=self.rotation
+                spriteLp.rotation = self.rotation
                 spriteLp.draw()
-
 
                 self.spriteSliderCrossfade.draw()
                 self.spriteSliderVolume.draw()
 
                 spriteForeground.draw()
 
-
                 if self.pointing:
                     self.spriteCursor.draw()
-
 
 
             pyglet.clock.schedule(draw)
@@ -105,25 +102,27 @@ class Visualisation():
         t.start()
 
 
-    def setCursor(self,x,y):
+    def setCursor(self, x, y):
         if self.spriteCursor:
-            self.spriteCursor.x=int(round(x+self.width/2))-self.radius
-            self.spriteCursor.y=int(round(y+self.height/2))
+            self.spriteCursor.x = int(round(x + self.width / 2)) - self.radius
+            self.spriteCursor.y = int(round(y + self.height / 2))
 
-    def setCrossfader(self,factor):
+    def setCrossfader(self, factor):
         if self.spriteSliderCrossfade:
-            dis=abs(self.crossfadeRange[1]-self.crossfadeRange[0])
-            self.spriteSliderCrossfade.x=self.crossfadeRange[0]+dis*factor
+            dis = abs(self.crossfadeRange[1] - self.crossfadeRange[0])
+            self.spriteSliderCrossfade.x = self.crossfadeRange[0] + dis * factor
 
-    def setVolume(self,vol):
+    def setVolume(self, vol):
         if self.spriteSliderVolume:
-            dis=abs(self.volumeRange[1]-self.volumeRange[0])
-            self.spriteSliderVolume.y=self.volumeRange[0]+dis*(vol/100.)
+            dis = abs(self.volumeRange[1] - self.volumeRange[0])
+            self.spriteSliderVolume.y = self.volumeRange[0] + dis * (vol / 100.)
 
-    def setRotation(self,rot):
-        self.rotation=rot
+    def setRotation(self, rot):
+        self.rotation = rot
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     from LPSimulator import LP
-    v=Visualisation(LP(0,0,50))
+
+    v = Visualisation(LP(0, 0, 50))
     v.start()
