@@ -8,11 +8,12 @@ import time
 
 class LP(Thread):
 
-    def __init__(self,updateFunction=lambda x: x,radius=200,x=0,y=0,):
+    def __init__(self,updateFunction=lambda x: x,radius=200,x=None,y=None,):
         Thread.__init__(self)
 
-        self.x=x
-        self.y=y
+
+        self.x=x or radius
+        self.y=y or 0
         self.radius=radius
         self.revolution=45
 

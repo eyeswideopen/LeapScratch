@@ -2,11 +2,8 @@ from threading import Thread
 from LPSimulator import LP
 from Visualisation import Visualisation
 from LeapController import LeapController
-from fastAudioController import AudioController
-from FileHandler import FileHandler
+from AudioController import AudioController
 
-# from samysFastAudioController import AudioController
-# from samysFileHandler import FileHandler
 
 class Controller(Thread):
     def __init__(self, baseFilePath, scratchFilePath,gui=True):
@@ -37,7 +34,12 @@ class Controller(Thread):
 
         if scratching and scratchPosition:
             self.gui.pointing=True
+            scratchPosition.x*=2
+            scratchPosition.z*=-2
+
             self.gui.setCursor(scratchPosition.x,scratchPosition.z)
+
+            scratchPosition.z*=-1
             self.lp.setPosition(scratchPosition)
         elif breaking:
             self.gui.pointing=True

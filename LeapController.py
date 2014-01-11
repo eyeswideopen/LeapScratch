@@ -15,6 +15,7 @@ class LeapController(Leap.Listener):
         self.crossfade=[0,1]
         self.volume=100
         self.gestured=False
+        self.crossfading=False
         self.notifyFunction=notifyFunction
 
     def start(self):
@@ -69,7 +70,6 @@ class LeapController(Leap.Listener):
             if self.crossfade[0] < 0: self.crossfade[0] = 0
             if self.crossfade[1] > 1: self.crossfade[1] = 1
             if self.crossfade[1] < 0: self.crossfade[1] = 0
-            # self.visualisation.setCrossfader(self.crossfade[1])
             return self.crossfade
 
         def calculateVolume():
@@ -103,7 +103,13 @@ class LeapController(Leap.Listener):
         if len(hands) > 0:
             hand = hands.leftmost
 
-            if hand.palm_position.y < 200 and hand.palm_position.x<0:
+            distance=self.crossfade
+
+            if (hand.palm_position.y < 200 and hand.palm_position.x<0) or self.crossfading:
+                if len(hands)==1:
+                    self.crossfading=True
+                else:
+                    self.crossfading=False
                 if not self.lastCrossfadePos:
                     self.lastCrossfadePos = hand.palm_position.x
                     return self.crossfade
@@ -115,9 +121,15 @@ class LeapController(Leap.Listener):
 
                 if x > y:
                     self.lastCrossfadePos = y
-                    return calculateDistance(dis)
-                self.lastCrossfadePos = y
-                return calculateDistance(-dis)
+                    distance= calculateDistance(dis)
+                else:
+                    self.lastCrossfadePos = y
+                    distance= calculateDistance(-dis)
+
+            if hand.palm_position.y > 200 :
+                self.crossfading=False
+
+            return distance
 
         self.lastCrossfadePos = None
 
@@ -134,7 +146,7 @@ class LeapController(Leap.Listener):
         #pop next frame if available, else returns old scale
         frame = self.path.pop() if len(self.path) > 0 else None
 
-        if self.gestured:
+        if self.gestured or self.crossfading:
             self.notifyFunction(False,False,volume=self.volume,crossfade=self.crossfade)
             return 1
         elif not frame:
@@ -170,8 +182,6 @@ class LeapController(Leap.Listener):
         self.notifyFunction(breaking, True if scale!=1 and not breaking else False,p,self.crossfade,self.volume,scale)
 
         return scale
-
-        #TODO: wenn crossfade an, dann kein scratchen bei >0, plattenposition anpassen (lp,gui,leap)
 
 if __name__ == "__main__":
     leap = LeapController()

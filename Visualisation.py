@@ -15,7 +15,7 @@ class Visualisation():
         self.height=720
         self.rotation=0
         self.volume=100
-        self.xOffset=200
+        # self.xOffset=radius
 
 
     def start(self):
@@ -36,7 +36,7 @@ class Visualisation():
             picLp.anchor_x = picLp.width /2
             picLp.anchor_y = picLp.height / 2
 
-            spriteLp=pyglet.sprite.Sprite(picLp,width/2+self.xOffset,height/2)
+            spriteLp=pyglet.sprite.Sprite(picLp,width/2+self.radius,height/2)
 
             scale=self.radius*2/float(picLp.width)
             spriteLp.scale=scale
@@ -77,18 +77,21 @@ class Visualisation():
                 pyglet.gl.glEnd()
 
 
-
-
             def draw(e):
                 w.clear()
                 spriteLp.rotation=self.rotation
                 spriteLp.draw()
 
-
                 self.spriteVolume.draw()
 
                 self.spriteSlider.draw()
                 self.spriteCrossfader.draw()
+
+                volumeText.draw()
+
+
+                if self.pointing:
+                    self.spriteCursor.draw()
 
 
                 scale=400*self.volume/100
@@ -99,11 +102,10 @@ class Visualisation():
                 pyglet.gl.glColor3f(255,0,0)
                 draw_rect(75,height-65,scale,20)
 
-                volumeText.draw()
-                if self.pointing:
-                    self.spriteCursor.draw()
+
 
             pyglet.clock.schedule(draw)
+
 
             pyglet.app.run()
 
@@ -113,9 +115,10 @@ class Visualisation():
 
 
     def setCursor(self,x,y):
+
         if self.spriteCursor:
-            self.spriteCursor.x=x+self.width/2+self.xOffset
-            self.spriteCursor.y=-y+self.height/2
+            self.spriteCursor.x=int(round(x+self.width/2))
+            self.spriteCursor.y=int(round(y+self.height/2))
 
     def setCrossfader(self,factor):
         if self.spriteCrossfader:
