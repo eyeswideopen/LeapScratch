@@ -1,28 +1,50 @@
 import pyaudio
 import struct
 import numpy
+import wave
 
 
 class AudioController:
-    def __init__(self, fileObject, scaleMethod):
+    def __init__(self, fileName, scaleMethod):
 
         self.p = pyaudio.PyAudio()
-        self.file = fileObject
-        self.interpolationBufferTail = [0, 0, 0, 0, 0, 0]
+        # self.interpolationBufferTail = [0, 0, 0, 0, 0, 0]
+
+        #
+        # file reading and conversion
+        #
+        self.index = 4 # for resampling
+
+
+        self.wf = wave.open(fileName, 'rb')
+        print "loading file ..."
+        print fileName
+        self.fileData = self.wf.readframes(self.wf.getnframes())
+        self.wf.close()
+
+        #format: 1 short out of each 2 chars in fileData
+        #interleaved int16 data of both channels with #frames samples
+        self.fileData = struct.unpack("%dh" % (len(self.fileData) / 2), self.fileData)
+        print "... file read to memory and converted to int16!"
+
+
+        #
+        # audio setup
+        #
+        self.frameSize = 128
+        print "starting audio playback with %i channels, %iHz framerate and %i framesize!" \
+              % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
         def callback(in_data, frame_count, time_info, status):
             return self.getAudio(frame_count, scaleMethod()), pyaudio.paContinue
 
-        self.stream = self.p.open(format=self.p.get_format_from_width(self.file.getSampleWidth()),
-                                  channels=self.file.getChannels(),
-                                  rate=self.file.getFramerate(),
+
+        self.stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
+                                  channels=self.wf.getnchannels(),
+                                  rate=self.wf.getframerate(),
                                   output=True,
                                   stream_callback=callback,
-                                  frames_per_buffer=128)
-
-    def start(self):
-        self.stream.start_stream()
-
+                                  frames_per_buffer=self.frameSize)
 
     def stop(self):
         self.stream.stop_stream()
@@ -32,38 +54,42 @@ class AudioController:
 
     def getAudio(self, frames, scale):
 
+        # scale = 0.5
+
         #frames is the requested amount of int16 sample per channel
-        #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
+        #means if frames is 1024 we have to return a string containing 2048 samples of interleaved x-_---int16 data
         #thus len(data) has to be 4096 as one char is only 1 byte long
 
         framesToRead = int(frames * abs(scale))
 
         #to low scale => silence
-        if abs(scale) < 0.1:
+        if abs(scale) < 0.01:
             return (frames * 4) * "0"
 
-        data = self.file.getFileData(framesToRead, True if scale < 0 else False)
 
-        #append head for interpolation
-        data = tuple(self.interpolationBufferTail) + data
+        if scale != 1.0:
 
-        #resample
-        data = self.resample(data, frames * 2)
+            #reverse playback
+            if scale < 0.0:
+                self.index -= int(frames * 2 * abs(scale))
+                return struct.pack("%dh" % (2 * frames), *list(self.resample(frames * 2, scale)[::-1])) #reversed resampled audio data
 
-        #save tail for next interpolation
-        self.interpolationBufferTail = data[len(data) - 6:]
-
-        return struct.pack("%dh" % (len(data)), *list(data))
+            #resample
+            return struct.pack("%dh" % (2 * frames), *list(self.resample(frames * 2, abs(scale))))
 
 
-    def resample(self, inData, length):
+        self.index += 2 * frames
+        return struct.pack("%dh" % (frames * 2), *list(self.fileData[self.index - 2 * frames: self.index]))
+
+
+    def resample(self, length, scale):
 
         ##6-point, 5th-order optimal 32x z-form interpolator
         ##params:
         ##x = ranges from 0 to 1. distance between y[2] and point to be interpolated
         ##y = 6 point surrounding array e.g.: y[0] y[1] y[2] <point to be interpolated> y[3] y[4] y[5]
 
-        def waveInterpolator(x, y):
+        def hermiteInterpolator(x, y):
             offset = 2
 
             z = x - 1 / 2.0
@@ -84,28 +110,34 @@ class AudioController:
             return ((((c5 * z + c4) * z + c3) * z + c2) * z + c1) * z + c0
 
 
+        interpolationLength = int(length * abs(scale))
+
+
         #generating our indices to interpolate at by ignoring our leading and trailing buffers of len 6 each
-        interpolationIndices = numpy.linspace(6, len(inData) - 7, num=length)
-        #TODO: maybe 2 mehr an laenge nehmen und vorne und hinten abcutten, da die immer exakt drauf liegen...
+        # interpolationIndices = numpy.linspace(6, len(inData) - 7, num=length)
+        interpolationIndices = numpy.linspace(self.index, self.index + interpolationLength, num=length)
 
         ##
         ##hermite interpolation using waveInterpolator
         ##
 
         #generate params
-        outData = []
+        params = [0,0,0,0,0,0]
+        outData =[]
         for i in interpolationIndices:
             dist = float(i - int(i))
-            params = []
             pointer = int(i)
 
-            params.append(inData[pointer - 4])
-            params.append(inData[pointer - 2])
-            params.append(inData[pointer])
+            params[0] = (self.fileData[pointer - 4])
+            params[1] = (self.fileData[pointer - 2])
+            params[2] = (self.fileData[pointer])
             #between these two points is our index located, distance represented by dist
-            params.append(inData[pointer + 2])
-            params.append(inData[pointer + 4])
-            params.append(inData[pointer + 6])
+            params[3] = (self.fileData[pointer + 2])
+            params[4] = (self.fileData[pointer + 4])
+            params[5] = (self.fileData[pointer + 6])
 
-            outData.append(waveInterpolator(dist, params))
+            outData.append(hermiteInterpolator(dist, params))
+
+        if scale > 0.0:
+            self.index += interpolationLength
         return outData
