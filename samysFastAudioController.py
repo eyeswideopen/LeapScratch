@@ -41,6 +41,7 @@ class AudioController:
 
     def getAudio(self, frames, scale,volume):
 
+
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved int16 data
         #thus len(data) has to be 4096 as one char is only 1 byte long
@@ -50,8 +51,8 @@ class AudioController:
 
 
         #to low scale => silence
-        if abs(scale) < 0.1:
-            return (frames * 4) * "0"
+        # if abs(scale) < 0.01:
+        #     return (frames * 4) * "0"
 
         data = self.file.getFileData(framesToRead, True if scale < 0 else False)
 

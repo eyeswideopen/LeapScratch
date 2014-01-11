@@ -46,7 +46,7 @@ class FileHandler:
         if reverse:
             self.index -= frames
 
-            return_data =audioop.reverse(data,self.wf.getsampwidth())
+            return_data =audioop.reverse(data,1)
 
         self.index += frames
 

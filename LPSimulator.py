@@ -8,7 +8,7 @@ import time
 
 class LP(Thread):
 
-    def __init__(self,updateFunction=lambda x: x,radius=150,x=0,y=0,):
+    def __init__(self,updateFunction=lambda x: x,radius=200,x=0,y=0,):
         Thread.__init__(self)
 
         self.x=x
@@ -24,6 +24,8 @@ class LP(Thread):
 
         self.pos=None
         self.lastPos=None
+
+        self.friction=1
 
         self.degreesPerMillisecond=(360*(self.revolution/60))/1000 #delta for every millisecond depending on revolutions per minute
 
@@ -48,7 +50,7 @@ class LP(Thread):
             # if self.rotation>=360:
             #     self.rotation=0
             if not self.scratching:
-                self.rotation+=self.degreesPerMillisecond
+                self.rotation+=self.degreesPerMillisecond*self.friction
             self.updateRotation(self.rotation)
             time.sleep(0.001)
 

@@ -12,10 +12,9 @@ class LeapController(Leap.Listener):
         self.lastFrame = None
         self.frame=None
         self.lastScale = 1.0
-        self.crossfade=[1,0]
+        self.crossfade=[0,1]
         self.volume=100
         self.gestured=False
-
         self.notifyFunction=notifyFunction
 
     def start(self):
@@ -56,10 +55,7 @@ class LeapController(Leap.Listener):
                 return
 
         self.gestured = False
-
         self.path.append(frame)
-
-
 
     def calculateCrossfade(self):
 
@@ -104,10 +100,10 @@ class LeapController(Leap.Listener):
 
         hands = self.frame.hands
 
-        if len(hands) > 1:
+        if len(hands) > 0:
             hand = hands.leftmost
 
-            if hand.palm_position.y < 200:
+            if hand.palm_position.y < 200 and hand.palm_position.x<0:
                 if not self.lastCrossfadePos:
                     self.lastCrossfadePos = hand.palm_position.x
                     return self.crossfade
@@ -139,23 +135,28 @@ class LeapController(Leap.Listener):
         frame = self.path.pop() if len(self.path) > 0 else None
 
         if self.gestured:
-            self.notifyFunction(False,volume=self.volume,crossfade=self.crossfade)
+            self.notifyFunction(False,False,volume=self.volume,crossfade=self.crossfade)
             return 1
         elif not frame:
             return self.lastScale
-
-
-        #TODO: get rid of path...
 
         pos = self.getPos(frame)
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        scale = translation.z / 3 if pos and pos.y < 200 else 1.0
+
+        breaking=False
+        if pos and pos.y < 100 and pos.x>0:
+            scale=translation.z / 3
+        elif pos and pos.y<200 and pos.x>0:
+            scale=(pos.y-100)/100
+            breaking=True
+        else:
+            scale= 1
 
         self.path.clear()
 
-        threshold = 0.1
+        threshold = 0.2
         if abs(abs(scale) - abs(self.lastScale))> threshold:
             scale = self.lastScale + threshold if self.lastScale < scale else self.lastScale - threshold
 
@@ -166,9 +167,11 @@ class LeapController(Leap.Listener):
 
         p=frame.hands.rightmost.palm_position
 
-        self.notifyFunction(True if scale!=1 else False,p,self.crossfade,self.volume)
+        self.notifyFunction(breaking, True if scale!=1 and not breaking else False,p,self.crossfade,self.volume,scale)
 
         return scale
+
+        #TODO: wenn crossfade an, dann kein scratchen bei >0, plattenposition anpassen (lp,gui,leap)
 
 if __name__ == "__main__":
     leap = LeapController()

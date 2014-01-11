@@ -11,9 +11,11 @@ class Visualisation():
         self.spriteCrossfader=None
         self.spriteSlider=None
         self.spriteVolume=None
-        self.width=600
-        self.height=480
+        self.width=1024
+        self.height=720
         self.rotation=0
+        self.volume=100
+        self.xOffset=200
 
 
     def start(self):
@@ -34,7 +36,7 @@ class Visualisation():
             picLp.anchor_x = picLp.width /2
             picLp.anchor_y = picLp.height / 2
 
-            spriteLp=pyglet.sprite.Sprite(picLp,width/2,height/2)
+            spriteLp=pyglet.sprite.Sprite(picLp,width/2+self.xOffset,height/2)
 
             scale=self.radius*2/float(picLp.width)
             spriteLp.scale=scale
@@ -54,9 +56,11 @@ class Visualisation():
             scale=50/float(self.spriteVolume.width)
             self.spriteVolume.scale=scale
 
-            self.spriteVolume.x=0
-            self.spriteVolume.y=height-50
+            self.spriteVolume.x=10
+            self.spriteVolume.y=height-80
 
+
+            volumeText=pyglet.text.Label("volume",x=10,y=height-20)
 
             def close():
                 os._exit(0)
@@ -80,19 +84,22 @@ class Visualisation():
                 spriteLp.rotation=self.rotation
                 spriteLp.draw()
 
+
                 self.spriteVolume.draw()
 
                 self.spriteSlider.draw()
                 self.spriteCrossfader.draw()
 
+
                 scale=400*self.volume/100
                 pyglet.gl.glColor3f(255,255,255)
-                draw_rect(70,height-40,410,30)
+                draw_rect(70,height-70,410,30)
                 pyglet.gl.glColor3f(0,0,0)
-                draw_rect(75,height-35,400,20,False)
+                draw_rect(75,height-65,400,20,False)
                 pyglet.gl.glColor3f(255,0,0)
-                draw_rect(75,height-35,scale,20)
+                draw_rect(75,height-65,scale,20)
 
+                volumeText.draw()
                 if self.pointing:
                     self.spriteCursor.draw()
 
@@ -107,12 +114,11 @@ class Visualisation():
 
     def setCursor(self,x,y):
         if self.spriteCursor:
-            self.spriteCursor.x=x+self.width/2
+            self.spriteCursor.x=x+self.width/2+self.xOffset
             self.spriteCursor.y=-y+self.height/2
 
     def setCrossfader(self,factor):
         if self.spriteCrossfader:
-
             self.spriteCrossfader.x=self.spriteSlider.width*factor
 
     def setVolume(self,vol):
