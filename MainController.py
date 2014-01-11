@@ -22,8 +22,8 @@ class Controller(Thread):
 
         self.scratchMusic = AudioController(scratchFilePath, scaleFunction=self.leap.getScale,
                                             volumeFunction=self.leap.getScratchCrossfade, stoppingFunction=self.stop)
-        # self.baseMusic = AudioController(baseFilePath, volumeFunction=self.leap.getBaseCrossfade,
-        #                                  stoppingFunction=self.stop)
+        self.baseMusic = AudioController(baseFilePath, volumeFunction=self.leap.getBaseCrossfade,
+                                         stoppingFunction=self.stop)
         self.leap.start()
 
 
@@ -62,4 +62,4 @@ class Controller(Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("input/reversed.wav", "input/scratch.wav", gui=True)
+    c = Controller("input/file.wav", "input/scratch.wav", gui=True)

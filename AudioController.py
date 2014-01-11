@@ -37,7 +37,6 @@ class AudioController:
         def callback(in_data, frame_count, time_info, status):
 
             if self.index+self.frameSize*2>=self.wf.getnframes()*2:
-                print("fail")
                 stoppingFunction()
                 return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paAbort
 
@@ -57,8 +56,6 @@ class AudioController:
 
 
     def getAudio(self, frames, scale,volume):
-        print scale
-
         # scale = 0.5
 
         #frames is the requested amount of int16 sample per channel
