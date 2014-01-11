@@ -8,7 +8,6 @@ class AudioController:
     def __init__(self, fileName, scaleFunction=lambda:1,volumeFunction=lambda: 1):
 
         self.p = pyaudio.PyAudio()
-        # self.interpolationBufferTail = [0, 0, 0, 0, 0, 0]
 
         #
         # file reading and conversion
@@ -31,7 +30,7 @@ class AudioController:
         #
         # audio setup
         #
-        self.frameSize = 128
+        self.frameSize = 256
         print "starting audio playback with %i channels, %iHz framerate and %i framesize!" \
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 

@@ -20,9 +20,17 @@ class Controller(Thread):
 
         self.lp.start()
 
-        AudioController(scratchFilePath,scaleFunction=self.leap.getScale,volumeFunction=self.leap.getScratchCrossfade)
-        AudioController(baseFilePath,volumeFunction=self.leap.getBaseCrossfade)
+        self.scratchMusic=AudioController(scratchFilePath,scaleFunction=self.leap.getScale,volumeFunction=self.leap.getScratchCrossfade,stoppingFunction=self.stop)
+        self.baseMusic=AudioController(baseFilePath,volumeFunction=self.leap.getBaseCrossfade,stoppingFunction=self.stop)
         self.leap.start()
+
+
+    def stop(self):
+        self.lp.stopped=True
+        self.baseMusic.stop()
+        self.scratchMusic.stop()
+
+
 
     def rotateGui(self,rot):
         self.gui.setRotation(rot)
@@ -34,12 +42,13 @@ class Controller(Thread):
 
         if scratching and scratchPosition:
             self.gui.pointing=True
-            scratchPosition.x*=2
-            scratchPosition.z*=-2
+            scratchPosition.x*=3
+            scratchPosition.z*=-3
+
 
             self.gui.setCursor(scratchPosition.x,scratchPosition.z)
 
-            scratchPosition.z*=-1
+            if scratchPosition.x>self.lp.radius:scratchPosition.z*=-1
             self.lp.setPosition(scratchPosition)
         elif breaking:
             self.gui.pointing=True
@@ -55,4 +64,4 @@ class Controller(Thread):
 
 
 if __name__ == "__main__":
-    c = Controller( "output/beat.wav","input/scratch.wav",gui=True)
+    c = Controller( "output/beat.wav","input/file.wav",gui=True)

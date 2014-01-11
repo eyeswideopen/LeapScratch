@@ -8,14 +8,13 @@ class Visualisation():
         self.dir=0
         self.pointing=False
         self.spriteCursor=None
-        self.spriteCrossfader=None
-        self.spriteSlider=None
-        self.spriteVolume=None
+        self.spriteSliderCrossfade=None
+        self.spriteSliderVolume=None
         self.width=1024
-        self.height=720
+        self.height=640
         self.rotation=0
-        self.volume=100
-        # self.xOffset=radius
+        self.crossfadeRange=(-90,90)
+        self.volumeRange=(-120,120)
 
 
     def start(self):
@@ -28,6 +27,16 @@ class Visualisation():
 
             w=pyglet.window.Window(width,height)
 
+            picBackground = pyglet.image.load('resources/background.png')
+            spriteBackground=pyglet.sprite.Sprite(picBackground)
+            scale=width/float(spriteBackground.width)
+            spriteBackground.scale=scale
+            
+            picForeground = pyglet.image.load('resources/topLayer.png')
+            spriteForeground=pyglet.sprite.Sprite(picForeground)
+            scale=width/float(spriteForeground.width)
+            spriteForeground.scale=scale
+
             picHand = pyglet.image.load('resources/hand.png')
             picHand.anchor_y = picHand.height
             self.spriteCursor=pyglet.sprite.Sprite(picHand)
@@ -36,31 +45,22 @@ class Visualisation():
             picLp.anchor_x = picLp.width /2
             picLp.anchor_y = picLp.height / 2
 
-            spriteLp=pyglet.sprite.Sprite(picLp,width/2+self.radius,height/2)
+            spriteLp=pyglet.sprite.Sprite(picLp,width/2+32,height/2)
 
-            scale=self.radius*2/float(picLp.width)
+            scale=0.355
             spriteLp.scale=scale
 
 
-            picSlider = pyglet.image.load('resources/slider.png')
-            self.spriteSlider=pyglet.sprite.Sprite(picSlider)
-            scale=width/float(self.spriteSlider.width)
-            self.spriteSlider.scale=scale
+            picSliderCrossfade = pyglet.image.load('resources/slider_crossfade.png')
+            self.spriteSliderCrossfade=pyglet.sprite.Sprite(picSliderCrossfade)
+            scale=width/float(self.spriteSliderCrossfade.width)
+            self.spriteSliderCrossfade.scale=scale
 
-            picCrossfader=pyglet.image.load('resources/pointer.png')
-            picCrossfader.anchor_x = picCrossfader.width /2
-            self.spriteCrossfader=pyglet.sprite.Sprite(picCrossfader)
+            picSliderVolume = pyglet.image.load('resources/slider_masterVolume.png')
+            self.spriteSliderVolume=pyglet.sprite.Sprite(picSliderVolume)
+            scale=width/float(self.spriteSliderVolume.width)
+            self.spriteSliderVolume.scale=scale
 
-            picVolume = pyglet.image.load('resources/volume.png')
-            self.spriteVolume=pyglet.sprite.Sprite(picVolume)
-            scale=50/float(self.spriteVolume.width)
-            self.spriteVolume.scale=scale
-
-            self.spriteVolume.x=10
-            self.spriteVolume.y=height-80
-
-
-            volumeText=pyglet.text.Label("volume",x=10,y=height-20)
 
             def close():
                 os._exit(0)
@@ -79,34 +79,25 @@ class Visualisation():
 
             def draw(e):
                 w.clear()
+
+                spriteBackground.draw()
+
                 spriteLp.rotation=self.rotation
                 spriteLp.draw()
 
-                self.spriteVolume.draw()
 
-                self.spriteSlider.draw()
-                self.spriteCrossfader.draw()
+                self.spriteSliderCrossfade.draw()
+                self.spriteSliderVolume.draw()
 
-                volumeText.draw()
+                spriteForeground.draw()
 
 
                 if self.pointing:
                     self.spriteCursor.draw()
 
 
-                scale=400*self.volume/100
-                pyglet.gl.glColor3f(255,255,255)
-                draw_rect(70,height-70,410,30)
-                pyglet.gl.glColor3f(0,0,0)
-                draw_rect(75,height-65,400,20,False)
-                pyglet.gl.glColor3f(255,0,0)
-                draw_rect(75,height-65,scale,20)
-
-
 
             pyglet.clock.schedule(draw)
-
-
             pyglet.app.run()
 
 
@@ -115,17 +106,19 @@ class Visualisation():
 
 
     def setCursor(self,x,y):
-
         if self.spriteCursor:
-            self.spriteCursor.x=int(round(x+self.width/2))
+            self.spriteCursor.x=int(round(x+self.width/2))-self.radius
             self.spriteCursor.y=int(round(y+self.height/2))
 
     def setCrossfader(self,factor):
-        if self.spriteCrossfader:
-            self.spriteCrossfader.x=self.spriteSlider.width*factor
+        if self.spriteSliderCrossfade:
+            dis=abs(self.crossfadeRange[1]-self.crossfadeRange[0])
+            self.spriteSliderCrossfade.x=self.crossfadeRange[0]+dis*factor
 
     def setVolume(self,vol):
-        self.volume=vol
+        if self.spriteSliderVolume:
+            dis=abs(self.volumeRange[1]-self.volumeRange[0])
+            self.spriteSliderVolume.y=self.volumeRange[0]+dis*(vol/100.)
 
     def setRotation(self,rot):
         self.rotation=rot

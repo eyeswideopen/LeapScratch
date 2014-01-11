@@ -12,7 +12,7 @@ class LP(Thread):
         Thread.__init__(self)
 
 
-        self.x=x or radius
+        self.x=x or 0
         self.y=y or 0
         self.radius=radius
         self.revolution=45
