@@ -20,7 +20,7 @@ class LP(Thread):
         self.updateRotation=updateFunction
 
         self.rotation=0
-        self.running=True
+        self.running=False
         self.scratching=False
 
         self.pos=None
@@ -44,14 +44,16 @@ class LP(Thread):
             self.addToRotation(self.getAngle(pos.x,pos.z,self.lastPos.x,self.lastPos.z))
 
     def run(self):
+        self.running=True
 
         while self.running:
+            #print self.rotation
             if self.stopped:
                 continue
-            # if self.rotation>=360:
-            #     self.rotation=0
+
             if not self.scratching:
                 self.rotation+=self.degreesPerMillisecond*self.friction
+
             self.updateRotation(self.rotation)
             time.sleep(0.001)
 
