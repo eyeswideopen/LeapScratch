@@ -8,12 +8,15 @@ class AudioController:
     def __init__(self, fileName, scaleFunction=lambda:1,volumeFunction=lambda: 1,stoppingFunction=lambda: 1):
 
         self.p = pyaudio.PyAudio()
-        
+
         #
         # file reading and conversion
         #
         self.index = 4 # for resampling
 
+        self.scaleFunction=scaleFunction
+        self.volumeFunction=volumeFunction
+        self.stoppingFunction=stoppingFunction
 
         self.wf = wave.open(fileName, 'rb')
         print "loading file ..."
@@ -34,14 +37,15 @@ class AudioController:
         print "starting audio playback with %i channels, %iHz framerate and %i framesize!" \
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
+
+    def start(self):
         def callback(in_data, frame_count, time_info, status):
 
             if self.index+self.frameSize*2>=self.wf.getnframes()*2:
-                print("fail")
-                stoppingFunction()
-                return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paAbort
+                self.stoppingFunction()
+                return self.getAudio(frame_count, self.scaleFunction(),self.volumeFunction()), pyaudio.paAbort
 
-            return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paContinue
+            return self.getAudio(frame_count, self.scaleFunction(),self.volumeFunction()), pyaudio.paContinue
 
 
         self.stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
@@ -51,15 +55,15 @@ class AudioController:
                                   stream_callback=callback,
                                   frames_per_buffer=self.frameSize)
 
+
     def stop(self):
+        self.stream.stop_stream()
         self.stream.close()
         self.p.terminate()
 
 
     def getAudio(self, frames, scale,volume):
-        print scale
-
-        # scale = 0.5
+	
 
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved x-_---int16 data

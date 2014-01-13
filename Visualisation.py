@@ -22,11 +22,11 @@ class Visualisation():
         def init():
             import pyglet
 
-
             width = self.width
             height = self.height
 
-            w = pyglet.window.Window(width, height)
+            w = pyglet.window.Window(width, height,visible=False)
+
 
             picBackground = pyglet.image.load('resources/background.png')
             spriteBackground = pyglet.sprite.Sprite(picBackground)
@@ -62,6 +62,7 @@ class Visualisation():
             self.spriteSliderVolume.scale = scale
 
 
+
             def close():
                 os._exit(0)
 
@@ -94,12 +95,17 @@ class Visualisation():
                     self.spriteCursor.draw()
 
 
+
             pyglet.clock.schedule(draw)
+
+            w.set_visible(True)
+
             pyglet.app.run()
 
 
         t = Thread(target=init)
         t.start()
+
 
 
     def setCursor(self, x, y):

@@ -43,7 +43,6 @@ class LeapController(Leap.Listener):
         return None, None
 
     def on_frame(self, controller):
-
         self.calculateCrossfade()
 
         frame = controller.frame()

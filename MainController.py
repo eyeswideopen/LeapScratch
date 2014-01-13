@@ -18,25 +18,32 @@ class Controller(Thread):
             self.gui = Visualisation(self.lp.radius)
             self.gui.start()
 
-        self.lp.start()
 
         self.scratchMusic = AudioController(scratchFilePath, scaleFunction=self.leap.getScale,
                                             volumeFunction=self.leap.getScratchCrossfade, stoppingFunction=self.stop)
-        # self.baseMusic = AudioController(baseFilePath, volumeFunction=self.leap.getBaseCrossfade,
-        #                                  stoppingFunction=self.stop)
-        self.leap.start()
+        self.baseMusic = AudioController(baseFilePath, volumeFunction=self.leap.getBaseCrossfade,
+                                         stoppingFunction=self.stop)
 
+        self.start()
+
+
+    def start(self):
+
+        self.scratchMusic.start()
+        self.baseMusic.start()
+        self.lp.start()
+        self.leap.start()
 
     def stop(self):
         self.lp.stopped=True
-        self.baseMusic.stop()
-        self.scratchMusic.stop()
+        # self.baseMusic.stop()
+        # self.scratchMusic.stop()
 
 
     def rotateGui(self, rot):
         self.gui.setRotation(rot)
 
-    def notifyGui(self, breaking, scratching, scratchPosition=None, crossfade=(1, 0), volume=1, scale=1):
+    def notifyGui(self, breaking, scratching, scratchPosition=None, crossfade=(0, 1), volume=1, scale=1):
         if not self.gui:
             return
         self.gui.setCrossfader(crossfade[1])
@@ -62,4 +69,4 @@ class Controller(Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("input/reversed.wav", "input/scratch.wav", gui=True)
+    c = Controller("input/file.wav", "input/scratch.wav", gui=True)
