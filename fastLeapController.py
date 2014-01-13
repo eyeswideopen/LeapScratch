@@ -1,4 +1,5 @@
 import sys, os, math
+
 sys.path.append("lib")
 import Leap
 import collections
@@ -44,16 +45,27 @@ class fastLeapController(Leap.Listener):
 
         #TODO: get rid of path...
 
+
         pos = self.getPos(frame)
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        scale = translation.x / 3 if pos and pos.y < 200 else 1.0
+        #slowdoooooown
+        if pos and pos.y < 150 and pos.x > 0:
+            scale = translation.x / 3
+        elif pos and pos.y < 250 and pos.x > 0:
+            scale = (pos.y - 150) / 100
+        else:
+            scale = 1
+
+        print scale
+
+        # scale = translation.x / 3 if pos and pos.y < 200 else 1.0
 
         self.path.clear()
 
         threshold = 0.3
-        if abs(abs(scale) - abs(self.lastScale))> threshold:
+        if abs(abs(scale) - abs(self.lastScale)) > threshold:
             scale = self.lastScale + threshold if self.lastScale < scale else self.lastScale - threshold
 
         # if abs(scale) < 0.3:
@@ -63,7 +75,3 @@ class fastLeapController(Leap.Listener):
 
         self.lastScale = scale
         return scale
-
-if __name__ == "__main__":
-    leap = NewLeapController()
-    leap.start()
