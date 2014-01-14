@@ -11,11 +11,21 @@ class fastLeapController(Leap.Listener):
         self.path = collections.deque(maxlen=1000)
         self.lastFrame = None
         self.lastScale = 1.0
+        self.volume = 100
+
+
+    def on_connect(self, controller):
+        controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE)
+
 
     def start(self):
         controller = Leap.Controller()
         controller.add_listener(self)
         sys.stdin.readline()
+
+
+    def getMasterVolume(self):
+        return self.volume / 100.
 
     def stop(self):
         os._exit(0)
@@ -33,8 +43,29 @@ class fastLeapController(Leap.Listener):
             return frame.translation(self.lastFrame), frame.translation_probability(self.lastFrame)
         return None, None
 
+    # def on_frame(self, controller):
+    #     self.path.append(controller.frame())
+
+
     def on_frame(self, controller):
-        self.path.append(controller.frame())
+        frame = controller.frame()
+        gestures = frame.gestures()
+        self.frame = frame
+
+        if len(gestures) > 0:
+            if gestures[0].type == Leap.Gesture.TYPE_CIRCLE:
+                circle = Leap.CircleGesture(gestures[0])
+                if circle.center[0] < 0:
+                    self.volume += 1 if circle.pointables[0].direction.angle_to(circle.normal) <= math.pi / 2 else -1
+
+                    if self.volume > 100:
+                        self.volume = 100
+                    elif self.volume < 0:
+                        self.volume = 0
+                    print self.volume
+
+        self.gestured = False
+        self.path.append(frame)
 
     def getScale(self):
 
@@ -57,8 +88,6 @@ class fastLeapController(Leap.Listener):
             scale = (pos.y - 150) / 100
         else:
             scale = 1
-
-        print scale
 
         # scale = translation.x / 3 if pos and pos.y < 200 else 1.0
 
