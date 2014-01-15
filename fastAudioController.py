@@ -5,7 +5,7 @@ import wave
 
 
 class AudioController:
-    def __init__(self, fileName, scaleFunction=lambda:1,volumeFunction=lambda: 1):
+    def __init__(self, fileName, scaleFunction=lambda: 1, volumeFunction=lambda: 1):
 
         self.p = pyaudio.PyAudio()
 
@@ -13,7 +13,6 @@ class AudioController:
         # file reading and conversion
         #
         self.index = 4 # for resampling
-
 
         self.wf = wave.open(fileName, 'rb')
         print "loading file ..."
@@ -35,7 +34,7 @@ class AudioController:
               % (self.wf.getnchannels(), self.wf.getframerate(), self.frameSize)
 
         def callback(in_data, frame_count, time_info, status):
-            return self.getAudio(frame_count, scaleFunction(),volumeFunction()), pyaudio.paContinue
+            return self.getAudio(frame_count, scaleFunction(), volumeFunction()), pyaudio.paContinue
 
 
         self.stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
@@ -51,9 +50,10 @@ class AudioController:
         self.p.terminate()
 
 
-    def getAudio(self, frames, scale,volume):
+    def getAudio(self, frames, scale, volume):
 
         # scale = 0.5
+        # volume = 0.1
 
         #frames is the requested amount of int16 sample per channel
         #means if frames is 1024 we have to return a string containing 2048 samples of interleaved x-_---int16 data
@@ -61,25 +61,25 @@ class AudioController:
 
         framesToRead = int(frames * abs(scale))
 
+        #dirrty wraparound
+        if scale > 0 and self.index + framesToRead * 2 > len(self.fileData):
+            self.index = 4
+        if scale < 0 and self.index - framesToRead * 2 <= 0:
+            self.index = len(self.fileData) - 6
+
         #to low scale => silence
         if abs(scale) < 0.2:
             return (frames * 4) * "0"
 
-        #TODO VOLUME!!!!
-
         if scale != 1.0:
-
-            #reverse playback
             if scale < 0.0:
                 self.index -= int(frames * 2 * abs(scale))
-                return struct.pack("%dh" % (2 * frames), *list(self.resample(frames * 2, scale)[::-1])) #reversed resampled audio data
-
-            #resample
-            return struct.pack("%dh" % (2 * frames), *list(self.resample(frames * 2, abs(scale))))
-
-
+                return struct.pack("%dh" % (2 * frames), *list(
+                    map(lambda x: x * volume, self.resample(frames * 2, scale))[::-1])) #reversed resampled audio data
+                #resample
+            return struct.pack("%dh" % (2 * frames), *list(map(lambda x: x * volume, self.resample(frames * 2, abs(scale)))))
         self.index += 2 * frames
-        return struct.pack("%dh" % (frames * 2), *list(self.fileData[self.index - 2 * frames: self.index]))
+        return struct.pack("%dh" % (frames * 2), *list(map(lambda x: x * volume, self.fileData[self.index - 2 * frames: self.index])))
 
 
     def resample(self, length, scale):
@@ -122,8 +122,8 @@ class AudioController:
         ##
 
         #generate params
-        params = [0,0,0,0,0,0]
-        outData =[]
+        params = [0, 0, 0, 0, 0, 0]
+        outData = []
         for i in interpolationIndices:
             dist = float(i - int(i))
             pointer = int(i)
@@ -140,4 +140,5 @@ class AudioController:
 
         if scale > 0.0:
             self.index += interpolationLength
+
         return outData
