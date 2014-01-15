@@ -11,8 +11,7 @@ class LP(Thread):
     def __init__(self,updateFunction=lambda x: x,radius=200,x=None,y=None,):
         Thread.__init__(self)
 
-
-        self.x=x or 0
+        self.x=x or 200
         self.y=y or 0
         self.radius=radius
         self.revolution=45
@@ -36,18 +35,18 @@ class LP(Thread):
     def addToRotation(self,angle):
         self.rotation+=angle
 
-    def setPosition(self,pos):
+    def setPosition(self,x,y):
         self.lastPos=self.pos
-        self.pos=pos
+        self.pos=(x,y)
+
         if self.pos and self.lastPos:
             self.scratching=True
-            self.addToRotation(self.getAngle(pos.x,pos.z,self.lastPos.x,self.lastPos.z))
+            self.addToRotation(self.getAngle(x,y,self.lastPos[0],self.lastPos[1]))
 
     def run(self):
         self.running=True
 
         while self.running:
-            #print self.rotation
             if self.stopped:
                 continue
 
@@ -67,32 +66,20 @@ class LP(Thread):
 
         if _y-self.y==0 or py-self.y==0:
             return 0
-        alpha1 =math.atan((_x-self.x) / (-abs(_y)-self.y))
-        alpha2 =math.atan((px-self.x) / (-abs(py)-self.y))
+        alpha1 =math.atan((_x-self.x) / (_y-self.y))
+        alpha2 =math.atan((px-self.x) / (py-self.y))
+
+        if alpha1>0:
+            alpha1*=-1
+        if alpha2>0:
+            alpha2*=-1
+
         alpha = alpha2 - alpha1
         if _y>0:
             alpha*=-1
 
         return math.degrees(alpha)
 
-
-
-
-
-
-    # def getAngle(self,_x,_y,px,py):
-    #     v1=[_x,_y]
-    #     v2=[px,py]
-    #
-    #     def dotproduct(v1, v2):
-    #         return sum((a*b) for a, b in zip(v1, v2))
-    #
-    #     def length(v):
-    #       return math.sqrt(dotproduct(v, v))
-    #
-    #     angle=math.acos(dotproduct(v1, v2) / (length(v1) * length(v2)))
-    #     print math.degrees(angle)
-    #     return math.degrees(angle)
 
     def getCircumferentialSpeed(self,d=None):
         dia=self.radius*2

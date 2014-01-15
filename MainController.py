@@ -27,6 +27,7 @@ class Controller(Thread):
         self.start()
 
 
+
     def start(self):
 
         self.scratchMusic.start()
@@ -34,10 +35,9 @@ class Controller(Thread):
         self.lp.start()
         self.leap.start()
 
+
     def stop(self):
         self.lp.stopped=True
-        # self.baseMusic.stop()
-        # self.scratchMusic.stop()
 
 
     def rotateGui(self, rot):
@@ -56,7 +56,9 @@ class Controller(Thread):
             self.gui.setCursor(scratchPosition.x, scratchPosition.z)
 
             if scratchPosition.x > self.lp.radius: scratchPosition.z *= -1
-            self.lp.setPosition(scratchPosition)
+
+            self.lp.setPosition(scratchPosition.x,scratchPosition.z)
+
         elif breaking:
             self.gui.pointing = True
             self.lp.scratching = False
@@ -69,4 +71,4 @@ class Controller(Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("input/file.wav", "input/scratch.wav", gui=True)
+    c = Controller("output/beat.wav", "input/file.wav", gui=True)

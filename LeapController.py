@@ -12,7 +12,7 @@ class LeapController(Leap.Listener):
         self.lastFrame = None
         self.frame=None
         self.lastScale = 1.0
-        self.crossfade=[0,1]
+        self.crossfade=[1,0]
         self.volume=100
         self.gestured=False
         self.crossfading=False
@@ -157,10 +157,10 @@ class LeapController(Leap.Listener):
 
 
         breaking=False
-        if pos and pos.y < 100 and pos.x>0:
+        if pos and pos.y < 150 and pos.x>0:
             scale=translation.x / 3
-        elif pos and pos.y<200 and pos.x>0:
-            scale=(pos.y-100)/100
+        elif pos and pos.y<250 and pos.x>0:
+            scale=(pos.y-150)/100
             breaking=True
         else:
             scale= 1
