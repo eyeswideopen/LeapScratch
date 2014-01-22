@@ -85,6 +85,9 @@ class Visualisation(QtGui.QMainWindow):
         self.xCrossfade=0
         self.yCrossfade=0
 
+        self.xPointer=0
+        self.yPointer=0
+
         background=QtGui.QImage("resources/background.png")
         self.background=background.scaled(width,height)
 
@@ -97,8 +100,7 @@ class Visualisation(QtGui.QMainWindow):
         foreground=QtGui.QImage("resources/topLayer.png")
         self.foreground=foreground.scaled(foreground.width()*scale,foreground.height()*scale)
 
-        pointer=QtGui.QImage("resources/hand.png")
-        self.pointer=pointer.scaled(pointer.width()*scale,pointer.height()*scale)
+        self.pointer=QtGui.QImage("resources/hand.png")
 
         sliderCrossfade=QtGui.QImage("resources/slider_crossfade.png")
         self.sliderCrossfade=sliderCrossfade.scaled(sliderCrossfade.width()*scale,sliderCrossfade.height()*scale)
@@ -112,7 +114,6 @@ class Visualisation(QtGui.QMainWindow):
         self.timer = QtCore.QTimer(interval=16,parent=self)
         self.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updating)
         self.timer.start()
-
 
         self.setWindowTitle('AirScratch')
 
@@ -137,11 +138,16 @@ class Visualisation(QtGui.QMainWindow):
         qp.restore()
 
         qp.drawImage(0,0,self.foreground)
+
+        if self.pointing:
+            qp.drawImage(self.xPointer,self.yPointer,self.pointer)
+
+
         qp.end()
 
     def setCursor(self, x, y):
-        self.xPointer = int(round(x + self.width / 2)) - self.radius
-        self.yPointer = int(round(y + self.height / 2))
+        self.xPointer = int(round(x + self.width() / 2)) - self.radius
+        self.yPointer = int(round(y + self.height() / 2))
 
     def setCrossfader(self, factor):
         dis = abs(self.crossfadeRange[1] - self.crossfadeRange[0])
@@ -149,10 +155,16 @@ class Visualisation(QtGui.QMainWindow):
 
     def setVolume(self, vol):
         dis = abs(self.volumeRange[1] - self.volumeRange[0])
-        self.yVolume = self.volumeRange[0] + dis * (vol / 100.)
+        self.yVolume = self.volumeRange[1] - dis * (vol / 100.)
 
     def setRotation(self, rot):
         self.rotation = rot
+
+
+    def mouseMoveEvent(self, event):
+        if self.controller:
+            self.controller.on_frame(event)
+
 
 
 
@@ -160,6 +172,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 
     gui= Visualisation(200)
+    gui.show()
 
     sys.exit(app.exec_())
 

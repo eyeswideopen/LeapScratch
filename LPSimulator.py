@@ -11,7 +11,7 @@ class LP(Thread):
     def __init__(self,updateFunction=lambda x: x,radius=200,x=None,y=None,):
         Thread.__init__(self)
 
-        self.x=x or 200
+        self.x=x or radius
         self.y=y or 0
         self.radius=radius
         self.revolution=45
@@ -41,7 +41,7 @@ class LP(Thread):
 
         if self.pos and self.lastPos:
             self.scratching=True
-            self.addToRotation(self.getAngle(x,y,self.lastPos[0],self.lastPos[1]))
+            self.addToRotation(-self.getAngle(x,y,self.lastPos[0],self.lastPos[1]))
 
     def run(self):
         self.running=True

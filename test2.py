@@ -1,6 +1,6 @@
 from threading import Thread
 from LPSimulator import LP
-from Visualisation import Visualisation
+from test import Visualisation
 from AngleLeapController import LeapController
 from AudioController import AudioController
 import time,sys
@@ -30,13 +30,13 @@ class Controller(Thread):
             def gui():
 
                 self.gui=Visualisation(self.lp.radius)
-                self.gui.start()
+                self.gui.run()
 
 
             t=Thread(target=gui)
             t.start()
 
-            self.loadStreams()
+            #self.loadStreams()
 
             time.sleep(stamp-time.time()+2)
             self.start()
@@ -57,7 +57,7 @@ class Controller(Thread):
 
         self.gui.pointing = True
 
-        angle = self.lp.getAngle(x2, y2, x1/3., y1/3.)
+        angle = self.lp.getAngle(x2, y2, x1, y1)
 
         ms=self.lp.degreesPerMillisecond
         t=(self.leap.timestamp-self.leap.prevTimestamp)
@@ -79,8 +79,8 @@ class Controller(Thread):
 
     def start(self):
 
-        self.scratchMusic.start()
-        self.baseMusic.start()
+        # self.scratchMusic.start()
+        # self.baseMusic.start()
         self.lp.start()
         self.leap.start()
 
@@ -97,30 +97,28 @@ class Controller(Thread):
         self.gui.setCrossfader(crossfade[1])
 
         if scratching and scratchPosition:
-            self.gui.pointing = True
             scratchPosition.x *= 3
             scratchPosition.z *=- 3
 
-            self.gui.setCursor(scratchPosition.x, scratchPosition.z)
+            self.gui.activateCursor(scratchPosition.x, scratchPosition.z)
 
             # # #TODO:
             if scratchPosition.x < self.lp.radius:
                 scratchPosition.z *= -1
 
-            self.lp.setPosition(scratchPosition.x,scratchPosition.z)
+            self.lp.setPosition(scratchPosition.x/3.,scratchPosition.z/3.)
 
 
         elif breaking and scratchPosition:
             scratchPosition.x *= 3
             scratchPosition.z *= 3
 
-            self.gui.setCursor(scratchPosition.x, scratchPosition.z)
-            self.gui.pointing = True
+            self.gui.activateCursor(scratchPosition.x, scratchPosition.z)
             self.lp.scratching = False
             self.lp.friction = scale
         else:
             self.lp.scratching = False
-            self.gui.pointing = False
+            self.gui.deactivateCursor()
             self.lp.friction = 1
         self.gui.setVolume(volume)
 
