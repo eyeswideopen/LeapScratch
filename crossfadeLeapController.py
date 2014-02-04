@@ -102,8 +102,9 @@ class fastLeapController(Leap.Listener):
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
+        scale = 1
 
-        if pos.y>250:
+        if pos and pos.y>250:
             self.calculateCrossfade(translation.x)
 
         #slowdoooooown
@@ -111,9 +112,6 @@ class fastLeapController(Leap.Listener):
             scale = translation.x / 4
         elif pos and pos.y < 250:
             scale = (pos.y - 150) / 100
-
-        else:
-            scale = 1
 
         self.path.clear()
 
