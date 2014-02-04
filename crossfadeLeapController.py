@@ -58,36 +58,14 @@ class fastLeapController(Leap.Listener):
         if self.crossfade[0] < 0: self.crossfade[0] = 0
         if self.crossfade[1] > 1: self.crossfade[1] = 1
         if self.crossfade[1] < 0: self.crossfade[1] = 0
+
+        print self.crossfade
+
         return self.crossfade
 
     def on_frame(self, controller):
 
         frame = controller.frame()
-
-        #crossfade
-
-        pos = self.getPos(frame)
-        translation, translationProb = self.getTranslation(frame)
-
-        if pos.y>250:
-            if self.lastCrossfadePos:
-                x = self.lastCrossfadePos
-                y = translation.x
-
-                dis = abs(x - y)
-
-                if x > y:
-                    self.calculateDistance(dis)
-                else:
-                    self.calculateDistance(-dis)
-
-                self.lastCrossfadePos = y
-
-            else:
-                self.lastCrossfadePos = translation.x
-
-        else:
-            self.lastCrossfadePos=None
 
         gestures = frame.gestures()
         self.frame = frame
@@ -123,6 +101,27 @@ class fastLeapController(Leap.Listener):
         pos = self.getPos(frame)
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
+
+
+        if pos.y>250:
+            if self.lastCrossfadePos:
+                x = self.lastCrossfadePos
+                y = translation.x
+
+                dis = abs(x - y)
+
+                if x > y:
+                    self.calculateDistance(dis)
+                else:
+                    self.calculateDistance(-dis)
+
+                self.lastCrossfadePos = y
+
+            else:
+                self.lastCrossfadePos = translation.x
+
+        else:
+            self.lastCrossfadePos=None
 
         #slowdoooooown
         if pos and pos.y < 150:
