@@ -89,8 +89,8 @@ class fastLeapController(Leap.Listener):
         if abs(abs(scale) - abs(self.lastScale)) > threshold:
             scale = self.lastScale + threshold if self.lastScale < scale else self.lastScale - threshold
 
-        # if abs(scale) < 0.3:
-        #     scale = 0.0
+        if abs(scale) < 0.1:
+            scale = 0.0
 
         scale = round(scale, 2)
 
