@@ -51,7 +51,7 @@ class fastLeapController(Leap.Listener):
     def on_frame(self, controller):
         self.counter+=1
         print self.counter
-        if self.counter==200:
+        if self.counter==700:
             print "pickled"
             pickle.dump( self.volumes, open( "volumes.p", "wb" ) )
             pickle.dump( self.crossfades, open( "crossfades.p", "wb" ) )
