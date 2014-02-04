@@ -48,7 +48,7 @@ class fastLeapController(Leap.Listener):
         return None, None
 
 
-    def calculateDistance(self,div):
+    def calculateCrossfade(self,div):
         div /= 75
         if abs(div) < 0.01:
             div = 0
@@ -104,27 +104,10 @@ class fastLeapController(Leap.Listener):
 
 
         if pos.y>250:
-            if self.lastCrossfadePos:
-                x = self.lastCrossfadePos
-                y = translation.x
-
-                dis = abs(x - y)
-
-                if x > y:
-                    self.calculateDistance(dis)
-                else:
-                    self.calculateDistance(-dis)
-
-                self.lastCrossfadePos = y
-
-            else:
-                self.lastCrossfadePos = translation.x
-
-        else:
-            self.lastCrossfadePos=None
+            self.calculateCrossfade(translation.x)
 
         #slowdoooooown
-        if pos and pos.y < 150:
+        elif pos and pos.y < 150:
             scale = translation.x / 4
         elif pos and pos.y < 250:
             scale = (pos.y - 150) / 100
