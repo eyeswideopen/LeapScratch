@@ -52,8 +52,8 @@ class fastLeapController(Leap.Listener):
         div /= 75
         if abs(div) < 0.01:
             div = 0
-        self.crossfade[0] += div
-        self.crossfade[1] -= div
+        self.crossfade[0] -= div
+        self.crossfade[1] += div
         if self.crossfade[0] > 1: self.crossfade[0] = 1
         if self.crossfade[0] < 0: self.crossfade[0] = 0
         if self.crossfade[1] > 1: self.crossfade[1] = 1
