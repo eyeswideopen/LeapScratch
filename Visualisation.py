@@ -1,6 +1,6 @@
 from threading import Thread
 
-import os
+import os,time
 
 
 class Visualisation():
@@ -68,17 +68,8 @@ class Visualisation():
 
             w.on_close = close
 
-            def draw_rect(x, y, width, height, filled=True):
-                param = pyglet.gl.GL_QUADS if filled else pyglet.gl.GL_LINE_LOOP
-                pyglet.gl.glBegin(param)
-                pyglet.gl.glVertex2f(x, y)
-                pyglet.gl.glVertex2f(x, y + height)
-                pyglet.gl.glVertex2f(x + width, y + height)                  # top right point
-                pyglet.gl.glVertex2f(x + width, y)                           # bottom right point
-                pyglet.gl.glEnd()
-
-
             def draw(e):
+                self.timestamp=t
                 w.clear()
 
                 spriteBackground.draw()
@@ -110,6 +101,7 @@ class Visualisation():
 
     def setCursor(self, x, y):
         if self.spriteCursor:
+            self.pointing=True
             self.spriteCursor.x = int(round(x + self.width / 2)) - self.radius
             self.spriteCursor.y = int(round(y + self.height / 2))
 
