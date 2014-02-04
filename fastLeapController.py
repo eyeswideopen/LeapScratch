@@ -49,11 +49,9 @@ class fastLeapController(Leap.Listener):
         return None, None
 
     def on_frame(self, controller):
-        print("harter")
-
         self.counter+=1
-
-        if self.counter>2000:
+        print self.counter
+        if self.counter==200:
             print "pickled"
             pickle.dump( self.volumes, open( "volumes.p", "wb" ) )
             pickle.dump( self.crossfades, open( "crossfades.p", "wb" ) )
