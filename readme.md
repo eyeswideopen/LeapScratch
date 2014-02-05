@@ -1,8 +1,10 @@
-LEAP-SCRATCH
-An In Air Turntable Simulator
+==============================
+Leap-Scratch -An In Air Turntable Simulator
 ==============================
  
 ABSTRACT
+==============================
+
 
 Leap-Scratch simulates the behaviour and characteristic audio features of a turntable and a rotating longplayer while manually interact with it - scratching. A rotaing longplayer is simulated in space above a Leap Motion Gusture-Tracking-Controller and the users hand position is analysed to manipulate the played audio information. Furthermore there is the the possibility to modify the master volume and crossfade between to audio streams by specified gestures. Thus users are able to use all features of physical turntables but have a digital and visual simulation.
 
@@ -31,17 +33,17 @@ There are some different implementations located in src directory:
 
 -scratching module contains a simple scratch implementation without any additional features
 
-	start it by navigating to src/scratching and then start the MainController file --> python MainController.py
+start it by navigating to src/scratching and then start the MainController file --> python MainController.py
 	
 
 -complete module contains a scratch implementation including additional features like volume and crossfade gesture detection
 
-	start it by navigating to src/complete and then start the MainController file --> python MainController.py
+start it by navigating to src/complete and then start the MainController file --> python MainController.py
 	
 	
 -gui module contains a seperate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation
 
-	start it by navigating to src/gui and then start the MainController file --> python MainController.py
+start it by navigating to src/gui and then start the MainController file --> python MainController.py
 
 
 
