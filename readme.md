@@ -1,16 +1,17 @@
 ==============================
 Leap-Scratch -An In Air Turntable Simulator
 ==============================
- 
-ABSTRACT
-==============================
+
 
 
 Leap-Scratch simulates the behaviour and characteristic audio features of a turntable and a rotating longplayer while manually interact with it - scratching. A rotaing longplayer is simulated in space above a Leap Motion Gusture-Tracking-Controller and the users hand position is analysed to manipulate the played audio information. Furthermore there is the the possibility to modify the master volume and crossfade between to audio streams by specified gestures. Thus users are able to use all features of physical turntables but have a digital and visual simulation.
 
 ==============================
 
+
+
 REQUIREMENTS/INSTALLATION
+==============================
 
 Hardware:
 -Obviously a LeapMotion controller is required to use the System
@@ -27,7 +28,10 @@ Software:
 
 ==============================
 
+
+
 USAGE
+==============================
 
 There are some different implementations located in src directory:
 
