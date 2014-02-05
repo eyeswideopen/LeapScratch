@@ -13,10 +13,6 @@ class fastLeapController(Leap.Listener):
         self.lastScale = 1.0
         self.volume = 100
 
-        self.volumes=[]
-        self.positions=[]
-        self.crossfades=[]
-        self.counter=0
 
 
 
@@ -49,13 +45,6 @@ class fastLeapController(Leap.Listener):
         return None, None
 
     def on_frame(self, controller):
-        self.counter+=1
-        print self.counter
-        if self.counter==700:
-            print "pickled"
-            pickle.dump( self.volumes, open( "volumes.p", "wb" ) )
-            pickle.dump( self.crossfades, open( "crossfades.p", "wb" ) )
-            pickle.dump( self.positions, open( "positions.p", "wb" ) )
 
         frame = controller.frame()
         gestures = frame.gestures()
@@ -72,10 +61,6 @@ class fastLeapController(Leap.Listener):
                     elif self.volume < 0:
                         self.volume = 0
 
-                    self.volumes.append(self.volume)
-
-        self.volumes.append(None)
-        self.crossfades.append(None)
 
         self.gestured = False
         self.path.append(frame)
@@ -93,13 +78,10 @@ class fastLeapController(Leap.Listener):
         #slowdoooooown
         if pos and pos.y < 150:
             scale = translation.x / 4
-            self.positions.append((pos.x,pos.z))
         elif pos and pos.y < 250:
             scale = (pos.y - 150) / 100
-            self.positions.append((pos.x,pos.z))
 
         else:
-            self.positions.append(None)
             scale = 1
 
         self.path.clear()
