@@ -1,11 +1,11 @@
 import sys, os, math
 
-sys.path.append("lib")
-import Leap,pickle
+sys.path.append("../../lib")
+import Leap
 import collections
 
 
-class fastLeapController(Leap.Listener):
+class LeapController(Leap.Listener):
     def __init__(self):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
@@ -13,10 +13,9 @@ class fastLeapController(Leap.Listener):
         self.lastScale = 1.0
         self.volume = 100
 
-        self.volumes=[]
-        self.positions=[]
-        self.crossfades=[]
-        self.counter=0
+        self.crossfade=[1,0]
+        self.lastCrossfadePos=None
+
 
 
 
@@ -48,16 +47,24 @@ class fastLeapController(Leap.Listener):
             return frame.translation(self.lastFrame), frame.translation_probability(self.lastFrame)
         return None, None
 
+
+    def calculateCrossfade(self,div):
+        div /= 75
+        if abs(div) < 0.01:
+            div = 0
+        self.crossfade[0] -= div
+        self.crossfade[1] += div
+        if self.crossfade[0] > 1: self.crossfade[0] = 1
+        if self.crossfade[0] < 0: self.crossfade[0] = 0
+        if self.crossfade[1] > 1: self.crossfade[1] = 1
+        if self.crossfade[1] < 0: self.crossfade[1] = 0
+
+        return self.crossfade
+
     def on_frame(self, controller):
-        self.counter+=1
-        print self.counter
-        if self.counter==700:
-            print "pickled"
-            pickle.dump( self.volumes, open( "volumes.p", "wb" ) )
-            pickle.dump( self.crossfades, open( "crossfades.p", "wb" ) )
-            pickle.dump( self.positions, open( "positions.p", "wb" ) )
 
         frame = controller.frame()
+
         gestures = frame.gestures()
         self.frame = frame
 
@@ -72,13 +79,16 @@ class fastLeapController(Leap.Listener):
                     elif self.volume < 0:
                         self.volume = 0
 
-                    self.volumes.append(self.volume)
 
-        self.volumes.append(None)
-        self.crossfades.append(None)
 
         self.gestured = False
         self.path.append(frame)
+
+    def getScratchCrossfade(self):
+        return self.crossfade[1]*self.volume/100
+
+    def getBaseCrossfade(self):
+        return self.crossfade[0]*self.volume/100
 
     def getScale(self):
         #pop next frame if available, else returns old scale
@@ -90,17 +100,19 @@ class fastLeapController(Leap.Listener):
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        #slowdoooooown
-        if pos and pos.y < 150:
-            scale = translation.x / 4
-            self.positions.append((pos.x,pos.z))
-        elif pos and pos.y < 250:
-            scale = (pos.y - 150) / 100
-            self.positions.append((pos.x,pos.z))
+        if not translation or not pos:
+            return self.lastScale
 
-        else:
-            self.positions.append(None)
-            scale = 1
+        scale = 1
+
+        if pos.y>250:
+            self.calculateCrossfade(translation.x)
+
+        #slowdoooooown
+        elif pos.y < 150:
+            scale = translation.x / 4
+        elif pos.y < 250:
+            scale = (pos.y - 150) / 100
 
         self.path.clear()
 

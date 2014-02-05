@@ -28,21 +28,21 @@ class Visualisation():
             w = pyglet.window.Window(width, height,visible=False)
 
 
-            picBackground = pyglet.image.load('resources/background.png')
+            picBackground = pyglet.image.load('../../resources/background.png')
             spriteBackground = pyglet.sprite.Sprite(picBackground)
             scale = width / float(spriteBackground.width)
             spriteBackground.scale = scale
 
-            picForeground = pyglet.image.load('resources/topLayer.png')
+            picForeground = pyglet.image.load('../../resources/topLayer.png')
             spriteForeground = pyglet.sprite.Sprite(picForeground)
             scale = width / float(spriteForeground.width)
             spriteForeground.scale = scale
 
-            picHand = pyglet.image.load('resources/hand.png')
+            picHand = pyglet.image.load('../../resources/hand.png')
             picHand.anchor_y = picHand.height
             self.spriteCursor = pyglet.sprite.Sprite(picHand)
 
-            picLp = pyglet.image.load('resources/platte.png')
+            picLp = pyglet.image.load('../../resources/platte.png')
             picLp.anchor_x = picLp.width / 2
             picLp.anchor_y = picLp.height / 2
 
@@ -51,12 +51,12 @@ class Visualisation():
             scale = 0.355
             spriteLp.scale = scale
 
-            picSliderCrossfade = pyglet.image.load('resources/slider_crossfade.png')
+            picSliderCrossfade = pyglet.image.load('../../resources/slider_crossfade.png')
             self.spriteSliderCrossfade = pyglet.sprite.Sprite(picSliderCrossfade)
             scale = width / float(self.spriteSliderCrossfade.width)
             self.spriteSliderCrossfade.scale = scale
 
-            picSliderVolume = pyglet.image.load('resources/slider_masterVolume.png')
+            picSliderVolume = pyglet.image.load('../../resources/slider_masterVolume.png')
             self.spriteSliderVolume = pyglet.sprite.Sprite(picSliderVolume)
             scale = width / float(self.spriteSliderVolume.width)
             self.spriteSliderVolume.scale = scale

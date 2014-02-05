@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../../src/common")
+sys.path.append("../../src/gui")
 from threading import Thread
 from LPSimulator import LP
 from Visualisation import Visualisation
@@ -71,4 +74,4 @@ class Controller(Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("output/beat.wav", "input/file.wav", gui=True)
+    c = Controller("../../input/beat.wav", "../../input/beat.wav", gui=True)

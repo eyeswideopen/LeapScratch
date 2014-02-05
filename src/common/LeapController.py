@@ -1,20 +1,17 @@
 import sys, os, math
 
-sys.path.append("lib")
-import Leap,pickle
+sys.path.append("../../lib")
+import Leap
 import collections
 
 
-class fastLeapController(Leap.Listener):
+class LeapController(Leap.Listener):
     def __init__(self):
         Leap.Listener.__init__(self)
         self.path = collections.deque(maxlen=1000)
         self.lastFrame = None
         self.lastScale = 1.0
         self.volume = 100
-
-        self.crossfade=[1,0]
-        self.lastCrossfadePos=None
 
 
 
@@ -47,26 +44,9 @@ class fastLeapController(Leap.Listener):
             return frame.translation(self.lastFrame), frame.translation_probability(self.lastFrame)
         return None, None
 
-
-    def calculateCrossfade(self,div):
-        div /= 75
-        if abs(div) < 0.01:
-            div = 0
-        self.crossfade[0] -= div
-        self.crossfade[1] += div
-        if self.crossfade[0] > 1: self.crossfade[0] = 1
-        if self.crossfade[0] < 0: self.crossfade[0] = 0
-        if self.crossfade[1] > 1: self.crossfade[1] = 1
-        if self.crossfade[1] < 0: self.crossfade[1] = 0
-
-        print self.crossfade
-
-        return self.crossfade
-
     def on_frame(self, controller):
 
         frame = controller.frame()
-
         gestures = frame.gestures()
         self.frame = frame
 
@@ -86,12 +66,6 @@ class fastLeapController(Leap.Listener):
         self.gestured = False
         self.path.append(frame)
 
-    def getScratchCrossfade(self):
-        return self.crossfade[1]*self.volume/100
-
-    def getBaseCrossfade(self):
-        return self.crossfade[0]*self.volume/100
-
     def getScale(self):
         #pop next frame if available, else returns old scale
         frame = self.path.pop() if len(self.path) > 0 else None
@@ -102,16 +76,14 @@ class fastLeapController(Leap.Listener):
         translation, translationProb = self.getTranslation(frame)
         self.lastFrame = frame
 
-        scale = 1
-
-        if pos and pos.y>250:
-            self.calculateCrossfade(translation.x)
-
         #slowdoooooown
-        elif pos and pos.y < 150:
+        if pos and pos.y < 150:
             scale = translation.x / 4
         elif pos and pos.y < 250:
             scale = (pos.y - 150) / 100
+
+        else:
+            scale = 1
 
         self.path.clear()
 

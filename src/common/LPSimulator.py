@@ -1,8 +1,6 @@
 from __future__ import division
 import math
-
 from threading import Thread
-
 import time
 
 

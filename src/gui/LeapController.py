@@ -1,6 +1,6 @@
 from __future__ import division
 import sys, os, math
-sys.path.append("lib")
+sys.path.append("../../lib")
 import Leap
 import collections
 
