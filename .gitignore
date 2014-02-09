@@ -1,11 +1,10 @@
 LeapDeveloperKit
 bin
 include
-lib/python2.7
 scripts
-Lib
 Include
 *.pyc
+*.pyd
 .Python
 output
 .idea
