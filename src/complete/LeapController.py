@@ -1,6 +1,18 @@
 import sys, os, math
 
 sys.path.append("../../lib")
+
+p=sys.platform
+
+if p.startswith('win'):
+
+	arch="win64"
+	if p=="win32":
+		arch="win32"
+		
+	sys.path.append("../../lib/"+arch)
+	
+
 import Leap
 import collections
 

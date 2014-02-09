@@ -19,11 +19,12 @@ Hardware:
 Software:
 
 1. Install LeapMotion drivers (https://www.leapmotion.com/setup) 
-2. Install port audio (http://www.portaudio.com)
+2. Download, build and install port audio (http://www.portaudio.com)
 3. Install Python 2.7 (http://www.python.org/getit/) 
-4. Install Python Pip Package Manager (http://www.pip-installer.org/en/latest/installing.html)
-5. Open a console and navigate to Leap-Scratch directory
-6. Install required python packages by using Pip --> pip install -r requirements
+4. Install PyAudio, a python wrapper for portaudio (http://people.csail.mit.edu/hubert/pyaudio/)
+5. Install Python Pip Package Manager (http://www.pip-installer.org/en/latest/installing.html)
+6. Open a console and navigate to Leap-Scratch directory
+7. Install required python packages by using Pip --> pip install -r requirements
 
 
 ==============================
