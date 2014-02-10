@@ -1,19 +1,15 @@
 from __future__ import division
-import sys, os, math
+import sys, os, math,platform
 
 sys.path.append("../../lib")
 
-p=sys.platform
+p=platform.architecture()
 
-if p.startswith('win'):
-
-	arch="win64"
-	if p=="win32":
-		arch="win32"
-		
-	sys.path.append("../../lib/"+arch)
-	
-
+if p[1].startswith('Win'):
+    arch="win64"
+    if p[0]=="32bit":
+        arch="win32"
+    sys.path.append("../../lib/"+arch)
 
 import Leap
 import collections
