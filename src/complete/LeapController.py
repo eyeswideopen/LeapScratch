@@ -13,7 +13,7 @@ if p[1].startswith('Win'):
 elif p[1].startswith('ELF'):
     arch="x64"
     if p[0]=="32bit":
-        arch="x32"
+        arch="x86"
     sys.path.append("../../lib/"+arch)
 
 else:
