@@ -14,7 +14,12 @@ REQUIREMENTS/INSTALLATION
 ==============================
 
 Hardware:
--Obviously a LeapMotion controller is required to use the System
+
+- Obviously a LeapMotion controller is required to use the system
+- Another trivial requirement is an audio speaker installation 
+- Audio de-interleaving, resampling and re-interleaving is pretty costly. Low RAM and/or processor resources may cause sound flickering.
+- The system is cross-platform. Therefore you can use LeapScratch on Linux, Windows and MacOSX machines.
+
 
 Software:
 
@@ -64,4 +69,4 @@ example: "python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' "
 
 ==============================
 
-by Maximilian K�rner and Samuel Zeitler
+by Maximilian Koerner and Samuel Zeitler
