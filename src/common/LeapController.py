@@ -4,11 +4,21 @@ sys.path.append("../../lib")
 
 p=platform.architecture()
 
+
 if p[1].startswith('Win'):
     arch="win64"
     if p[0]=="32bit":
         arch="win32"
     sys.path.append("../../lib/"+arch)
+
+elif p[1].startswith('ELF'):
+    arch="x64"
+    if p[0]=="32bit":
+        arch="x86"
+    sys.path.append("../../lib/"+arch)
+
+else:
+    sys.path.append("../../lib/mac")
 	
 
 
