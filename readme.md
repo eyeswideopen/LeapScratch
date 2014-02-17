@@ -59,6 +59,9 @@ start it by navigating to src/complete and then start the MainController file --
 start it by navigating to src/gui and then start the MainController file --> python MainController.py
 
 
+You can select own audio files for the base and scratch streams by editing the "config" file in root project directory. Files must be located in "input" directory! 
+
+
 ==============================
 
 
