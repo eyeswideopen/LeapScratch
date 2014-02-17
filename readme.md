@@ -1,9 +1,10 @@
-==============================
-#Leap-Scratch 
 
-<a style="font-size:70%">harter enes<>
+#Leap-Scratch 
 ##An In Air Turntable Simulator
-==============================
+
+
+<p style="font-size:10%">harter enes<p>
+
 
 
 
@@ -14,6 +15,7 @@ Leap-Scratch simulates the behaviour and characteristic audio features of a turn
 
 
 ###REQUIREMENTS/INSTALLATION
+
 
 Hardware:
 
@@ -56,6 +58,10 @@ start it by navigating to src/complete and then start the MainController file --
 -gui module contains a seperate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation
 
 start it by navigating to src/gui and then start the MainController file --> python MainController.py
+
+
+==============================
+
 
 
 ###CONVERTER
