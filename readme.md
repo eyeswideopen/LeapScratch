@@ -2,7 +2,6 @@
 #Leap-Scratch
 
 
-<p>    <p>
 ##An In Air Turntable Simulator
 
 

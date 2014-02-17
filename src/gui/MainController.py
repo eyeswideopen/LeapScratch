@@ -1,11 +1,11 @@
 import sys
 sys.path.append("../../src/common")
-sys.path.append("../../src/gui")
 from threading import Thread
 from LPSimulator import LP
 from Visualisation import Visualisation
 from LeapController import LeapController
 from AudioController import AudioController
+from Config import Config
 
 
 class Controller(Thread):
@@ -28,7 +28,6 @@ class Controller(Thread):
                                          stoppingFunction=self.stop)
 
         self.start()
-
 
 
     def start(self):
@@ -74,4 +73,8 @@ class Controller(Thread):
 
 
 if __name__ == "__main__":
-    c = Controller("../../input/beat.wav", "../../input/beat.wav", gui=True)
+
+    base=Config.__getBaseFilePath__()
+    scratch=Config.__getScratchFilePath__()
+
+    Controller("../../input/"+base, "../../input/"+scratch,gui=True)

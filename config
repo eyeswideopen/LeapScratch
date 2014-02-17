@@ -1,0 +1,4 @@
+[files]
+#file paths for scratching and base audio streams. FILES MUST EXIST IN "INPUT" DIRECTORY!
+scratch = scratch.wav
+base = beat.wav

@@ -5,7 +5,9 @@ from threading import Thread
 from AudioController import AudioController
 from LeapController import LeapController
 
-class fastController(Thread):
+from Config import Config
+
+class Controller(Thread):
     def __init__(self, filePath):
         Thread.__init__(self)
         self.leap = LeapController()
@@ -13,4 +15,6 @@ class fastController(Thread):
         self.leap.start()
 
 if __name__ == "__main__":
-    c = fastController( "../../input/scratch.wav")
+    scratch=Config.__getScratchFilePath__()
+
+    Controller("../../input/"+scratch)
