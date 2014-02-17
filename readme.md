@@ -1,9 +1,6 @@
-
-Leap-Scratch 
+harter
+<sub>Leap-Scratch</sub>
 ##An In Air Turntable Simulator
-
-
-<font size=1>harter enes<font>
 
 
 
