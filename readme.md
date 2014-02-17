@@ -1,5 +1,7 @@
 ==============================
 #Leap-Scratch 
+
+<a style="font-size:70%">harter enes<>
 ##An In Air Turntable Simulator
 ==============================
 
@@ -11,8 +13,7 @@ Leap-Scratch simulates the behaviour and characteristic audio features of a turn
 
 
 
-REQUIREMENTS/INSTALLATION
-==============================
+###REQUIREMENTS/INSTALLATION
 
 Hardware:
 
@@ -37,8 +38,8 @@ Software:
 
 
 
-USAGE
-==============================
+###USAGE
+
 
 There are some different implementations located in src directory:
 
@@ -57,10 +58,10 @@ start it by navigating to src/complete and then start the MainController file --
 start it by navigating to src/gui and then start the MainController file --> python MainController.py
 
 
-CONVERTER
-==============================
+###CONVERTER
 
-If you want to use the embedded mp3 to wave converter, you have to install ffmpeg on your machine (http://www.ffmpeg.org/download.html). additionally the python library pydub is required. Use "pip install pydub"!
+
+If you want to use the embedded mp3-to-wave converter, you have to install ffmpeg on your machine (http://www.ffmpeg.org/download.html). additionally the python library pydub is required. Use "pip install pydub"!
 
 usage:
 
