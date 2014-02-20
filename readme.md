@@ -20,7 +20,7 @@ Hardware:
 
 - Obviously a **LeapMotion** controller is required to use the system
 - Another trivial requirement is an **audio speaker** installation 
-- Audio de-interleaving, resampling and re-interleaving is **pretty costly**. Low RAM and/or processor resources may cause sound flickering.
+- Audio de-interleaving, re-sampling and re-interleaving is **pretty costly**. Low RAM and/or processor resources may cause sound flickering.
 - The system is **cross-platform**. Therefore you can use LeapScratch on Linux, Windows and MacOSX machines.
 
 
@@ -46,12 +46,12 @@ There are some different implementations located in src directory:
 
 - **scratching** module contains a simple scratch implementation without any additional features. Code is located in **src/scratching**.
 
-- **complete** module contains a scratch implementation including additional features like volume and crossfade gesture detection. Code is located in **src/complete**.
+- **complete** module contains a scratch implementation including additional features like volume and cross-fade gesture detection. Code is located in **src/complete**.
 	
-- **gui** module contains a seperate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation.  Code is located in **src/gui**.
+- **gui** module contains a separate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation.  Code is located in **src/gui**.
 
 
-Start the particular modul by navigating to respective directory and start the MainController file: <pre><code>python MainController.py</pre></code>
+Start the particular module by navigating to respective directory and start the MainController file: <pre><code>python MainController.py</pre></code>
 
 You can select own audio files for the base and scratch streams by editing the "config" file in root project directory. Files must be located in "input" directory! 
 
