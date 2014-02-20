@@ -79,4 +79,6 @@ example: "python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' "
 
 ==============================
 
+product video: http://www.youtube.com/watch?v=ZENE0FXjj94
+
 by Maximilian Koerner and Samuel Zeitler
