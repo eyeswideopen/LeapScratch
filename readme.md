@@ -51,7 +51,7 @@ There are some different implementations located in src directory:
 - **gui** module contains a seperate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation.  Code is located in **src/gui**.
 
 
-start the particular modul by navigating to respective directory and start the MainController file: <pre><code>python MainController.py</pre></code>
+Start the particular modul by navigating to respective directory and start the MainController file: <pre><code>python MainController.py</pre></code>
 
 You can select own audio files for the base and scratch streams by editing the "config" file in root project directory. Files must be located in "input" directory! 
 
@@ -73,6 +73,14 @@ example: <pre><code>python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' </pre
 
 ==============================
 
-product video: http://www.youtube.com/watch?v=ZENE0FXjj94
+
+
+###DOCUMENTATION
+
+Product video: http://www.youtube.com/watch?v=ZENE0FXjj94
+
+Please have a look at **doc** directory for further information!
+
+==============================
 
 by Maximilian Koerner and Samuel Zeitler
