@@ -18,10 +18,10 @@ Leap-Scratch simulates the behaviour and characteristic audio features of a turn
 
 Hardware:
 
-- Obviously a LeapMotion controller is required to use the system
-- Another trivial requirement is an audio speaker installation 
-- Audio de-interleaving, resampling and re-interleaving is pretty costly. Low RAM and/or processor resources may cause sound flickering.
-- The system is cross-platform. Therefore you can use LeapScratch on Linux, Windows and MacOSX machines.
+- Obviously a **LeapMotion** controller is required to use the system
+- Another trivial requirement is an **audio speaker** installation 
+- Audio de-interleaving, resampling and re-interleaving is **pretty costly**. Low RAM and/or processor resources may cause sound flickering.
+- The system is **cross-platform**. Therefore you can use LeapScratch on Linux, Windows and MacOSX machines.
 
 
 Software:
@@ -32,7 +32,7 @@ Software:
 4. Install PyAudio, a python wrapper for portaudio (http://people.csail.mit.edu/hubert/pyaudio/)
 5. Install Python Pip Package Manager (http://www.pip-installer.org/en/latest/installing.html)
 6. Open a console and navigate to Leap-Scratch directory
-7. Install required python packages by using Pip --> pip install -r requirements
+7. Install required python packages by using Pip --> <pre><code>pip install -r requirements</pre></code>
 
 
 ==============================
@@ -44,19 +44,19 @@ Software:
 
 There are some different implementations located in src directory:
 
--scratching module contains a simple scratch implementation without any additional features
+- **scratching** module contains a simple scratch implementation without any additional features
 
-start it by navigating to src/scratching and then start the MainController file --> python MainController.py
+start it by navigating to src/scratching and then start the MainController file --> <pre><code>python MainController.py</pre></code>
 	
 
--complete module contains a scratch implementation including additional features like volume and crossfade gesture detection
+- **complete** module contains a scratch implementation including additional features like volume and crossfade gesture detection
 
-start it by navigating to src/complete and then start the MainController file --> python MainController.py
+start it by navigating to src/complete and then start the MainController file --> <pre><code>python MainController.py</pre></code>
 	
 	
--gui module contains a seperate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation
+- **gui** module contains a seperate audio, scratch and leap controller implementations, adjusted to a conceptual gui realisation
 
-start it by navigating to src/gui and then start the MainController file --> python MainController.py
+start it by navigating to src/gui and then start the MainController file --> <pre><code>python MainController.py</pre></code>
 
 
 You can select own audio files for the base and scratch streams by editing the "config" file in root project directory. Files must be located in "input" directory! 
@@ -69,13 +69,13 @@ You can select own audio files for the base and scratch streams by editing the "
 ###CONVERTER
 
 
-If you want to use the embedded mp3-to-wave converter, you have to install ffmpeg on your machine (http://www.ffmpeg.org/download.html). Additionally the python library pydub is required. Use "pip install pydub"!
+If you want to use the embedded mp3-to-wave **converter**, you have to install ffmpeg on your machine (http://www.ffmpeg.org/download.html). Additionally the python library pydub is required. Use "pip install pydub"!
 
 usage:
 
-"python mp3ToWav.py \<path/to/input/mp3/file\> [output name]"
+<pre><code>python mp3ToWav.py \<path/to/input/mp3/file\> [output name]</pre></code>
 
-example: "python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' "
+example: <pre><code>python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' </pre></code>
 
 ==============================
 
