@@ -69,11 +69,11 @@ You can select own audio files for the base and scratch streams by editing the "
 ###CONVERTER
 
 
-If you want to use the embedded mp3-to-wave converter, you have to install ffmpeg on your machine (http://www.ffmpeg.org/download.html). additionally the python library pydub is required. Use "pip install pydub"!
+If you want to use the embedded mp3-to-wave converter, you have to install ffmpeg on your machine (http://www.ffmpeg.org/download.html). Additionally the python library pydub is required. Use "pip install pydub"!
 
 usage:
 
-"python mp3ToWav.py <path/to/input/mp3/file> [output name]"
+"python mp3ToWav.py \*<path/to/input/mp3/file\*> [output name]"
 
 example: "python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' "
 
