@@ -73,7 +73,7 @@ If you want to use the embedded mp3-to-wave converter, you have to install ffmpe
 
 usage:
 
-"python mp3ToWav.py \*<\*path/to/input/mp3/file*\>*\ [output name]"
+"python mp3ToWav.py \<path/to/input/mp3/file\> [output name]"
 
 example: "python mp3ToWav.py '/home/user1/file.mp3' 'output.wav' "
 
