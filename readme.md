@@ -2,7 +2,7 @@
 #Leap-Scratch
 
 
-##An In Air Turntable Simulator
+<pre>##An In Air Turntable Simulator</pre>
 
 
 
@@ -42,7 +42,7 @@ Software:
 ###USAGE
 
 
-There are some different implementations located in src directory:
+There are some **different implementations** located in **src** directory:
 
 - **scratching** module contains a simple scratch implementation without any additional features. Code is located in **src/scratching**.
 
